@@ -7,6 +7,7 @@ import { MailService } from "../services/mail/mail.service"
 import { HelpersService } from "../services/utils/helpers/helpers.service"
 import { NotFoundException } from "@/exceptions/notfound.exception"
 import { BadReqException } from "@/exceptions/badRequest.exception"
+import User from "../user/entity/user.entity"
 
 @Injectable()
 export class AuthService {
@@ -31,7 +32,6 @@ export class AuthService {
     // })
     const payload = { email: createdUser.email, id: createdUser.id }
     const token = await this.helperService.generateToken(payload, this.configService.get<IAuth>("auth").shortTimeJwtSecret, "1h")
-    console.log("token", token)
     return { token }
   }
 
@@ -74,10 +74,10 @@ export class AuthService {
     return user
   }
 
-  async login(loginDto: LoginAuthDto) {
+  async login(loginDto: LoginAuthDto, user: User) {
     const payload = { email: loginDto.email, id: loginDto.id }
     const token = await this.helperService.generateToken(payload, this.configService.get<IAuth>("auth").jwtSecret, "1d")
     const refreshToken = await this.helperService.generateToken(payload, this.configService.get<IAuth>("auth").refreshSecret, "30d")
-    return { acecess_token: token, refreshToken }
+    return { user, tokens: { acecess_token: token, refreshToken } }
   }
 }

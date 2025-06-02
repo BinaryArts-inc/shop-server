@@ -6,11 +6,13 @@ import { JoiValidationPipe } from "@/validations/joi.validation"
 import { UserId } from "../user/decorator/user.decorator"
 import { BankInterceptor } from "./interceptors/bank.interceptor"
 import JwtShortTimeGuard from "../auth/guard/jwt-short-time.guard"
+import { Short_Time } from "../auth/decorators/short-time.decorator"
 
 @Controller("bank")
 export class BankController {
   constructor(private readonly bankService: BankService) {}
 
+  @Short_Time()
   @Post()
   @UseGuards(JwtShortTimeGuard)
   @UseInterceptors(BankInterceptor)

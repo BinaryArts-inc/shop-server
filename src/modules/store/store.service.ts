@@ -3,12 +3,13 @@ import { CreateStoreDto } from "./dto/create-store.dto"
 import { UpdateStoreDto } from "./dto/update-store.dto"
 import { InjectRepository } from "@nestjs/typeorm"
 import { Store } from "./entities/store.entity"
-import { Repository } from "typeorm"
+import { FindOptionsWhere, Repository } from "typeorm"
 import { UserService } from "../user/user.service"
 import { NotFoundException } from "@/exceptions/notfound.exception"
 import { HelpersService } from "../services/utils/helpers/helpers.service"
 import { ConfigService } from "@nestjs/config"
 import { IAuth } from "@/config/auth.config"
+import { ConflictException } from "@/exceptions/conflict.exception"
 
 @Injectable()
 export class StoreService {
@@ -22,6 +23,8 @@ export class StoreService {
   async create(createStoreDto: CreateStoreDto, userId: string) {
     const business = await this.userService.getUserBusiness({ user: { id: userId } })
     if (!business) throw new NotFoundException("Business does not exist")
+
+    if (await this.exist({ name: createStoreDto.name })) throw new ConflictException("Store name already exist")
 
     const store = this.storeRepository.create({
       ...createStoreDto,
@@ -37,8 +40,12 @@ export class StoreService {
     return `This action returns all store`
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} store`
+  async findOne(filter: FindOptionsWhere<Store>) {
+    return await this.storeRepository.findOne({ where: filter })
+  }
+
+  async exist(filter: FindOptionsWhere<Store>): Promise<boolean> {
+    return this.storeRepository.exists({ where: filter })
   }
 
   update(id: number, updateStoreDto: UpdateStoreDto) {

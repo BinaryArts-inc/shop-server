@@ -1,5 +1,5 @@
 import Business from "@/modules/user/entity/business.entity"
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToOne } from "typeorm"
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToOne, BeforeInsert, BeforeUpdate } from "typeorm"
 
 @Entity()
 export class Store {

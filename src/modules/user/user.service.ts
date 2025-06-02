@@ -65,7 +65,7 @@ export class UserService implements IService<User> {
     return this.UserRepository.findOne({ where: { id: id } })
   }
   async findOne(filter: FindOptionsWhere<User>): Promise<User> {
-    const user = await this.UserRepository.findOne({ where: filter })
+    const user = await this.UserRepository.findOne({ where: filter, relations: ["business", "business.store"] })
     if (!user) throw new BadReqException("User not found")
     return user
   }
@@ -101,6 +101,6 @@ export class UserService implements IService<User> {
   }
 
   async getUserBusiness(filter: FindOptionsWhere<Business>) {
-    return await this.businessRepository.findOne({ where: filter, relations: ["user"] })
+    return await this.businessRepository.findOne({ where: filter, relations: ["user", "store"] })
   }
 }

@@ -6,6 +6,7 @@ import { Bank } from "./entities/bank.entity"
 import { FindOptionsWhere, Repository } from "typeorm"
 import { UserService } from "../user/user.service"
 import { NotFoundException } from "@/exceptions/notfound.exception"
+import { ConflictException } from "@/exceptions/conflict.exception"
 
 @Injectable()
 export class BankService {
@@ -17,6 +18,8 @@ export class BankService {
   async create(createBankDto: CreateBankDto, userId: string) {
     const user = await this.userService.findOne({ id: userId })
     if (!user) throw new NotFoundException("User not found")
+
+    if (await this.exist({ accountNumber: createBankDto.accountNumber })) throw new ConflictException("Bank credentials already exist")
 
     const createbank = this.bankRepository.create({
       ...createBankDto,
@@ -36,6 +39,10 @@ export class BankService {
 
   async findOne(filter: FindOptionsWhere<Bank>) {
     return this.bankRepository.findOne({ where: filter, relations: ["user"] })
+  }
+
+  async exist(filter: FindOptionsWhere<Bank>): Promise<boolean> {
+    return await this.bankRepository.exists({ where: filter })
   }
 
   update(id: number, updateBankDto: UpdateBankDto) {

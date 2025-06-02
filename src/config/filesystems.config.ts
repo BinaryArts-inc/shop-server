@@ -4,7 +4,7 @@ import { FileSystemModuleAsynOptions, FileSystemModuleOptions } from "src/module
 
 function getOptions(): FileSystemModuleOptions {
   return {
-    default: "spaces",
+    default: "cloudinary",
     clients: {
       local: {
         driver: "local",

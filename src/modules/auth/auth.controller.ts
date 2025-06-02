@@ -1,4 +1,4 @@
-import { Controller, Post, Body, HttpCode, Patch, UseGuards, Req } from "@nestjs/common"
+import { Controller, Post, Body, HttpCode, Patch, UseGuards, Req, UseInterceptors } from "@nestjs/common"
 import { AuthService } from "./auth.service"
 import { JoiValidationPipe } from "@/validations/joi.validation"
 import { AuthDto, registerSchema, ResendOtpDto, resendOtpSchema, verifyEmailDto, verifyEmailSchema } from "./dto/auth.dto"
@@ -9,6 +9,7 @@ import { Request } from "express"
 import { PasswordAuthGuard } from "./guard/passport-auth.guard"
 import { LoginValidationGuard } from "./guard/login-validation.guard"
 import { Short_Time } from "./decorators/short-time.decorator"
+import { AuthInterceptor } from "./interceptors/auth.interceptor"
 
 @Public()
 @Controller("auth")
@@ -23,10 +24,10 @@ export class AuthController {
 
   @Post("/login/password")
   @HttpCode(200)
+  @UseInterceptors(AuthInterceptor)
   @UseGuards(LoginValidationGuard, PasswordAuthGuard)
   async login(@Req() req: Request) {
-    const tokens = await this.authService.login({ email: req.user.email, id: req.user.id })
-    return { ...req.user, tokens }
+    return await this.authService.login({ email: req.user.email, id: req.user.id }, req.user)
   }
 
   @Short_Time()

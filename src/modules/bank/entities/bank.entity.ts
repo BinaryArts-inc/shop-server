@@ -9,7 +9,7 @@ export class Bank {
   @Column()
   bankName: string
 
-  @Column()
+  @Column({ unique: true })
   accountNumber: string
 
   @Column()
