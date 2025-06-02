@@ -21,7 +21,7 @@ export interface IAuthResponse {
     updatedAt: Date
   }
   tokens: {
-    acecess_token: string
+    accessToken: string
     refreshToken: string
   }
 }
@@ -30,7 +30,7 @@ export interface AuthUserBusiness {
   user: User
   business: Business
   tokens: {
-    acecess_token: string
+    accessToken: string
     refreshToken: string
   }
 }

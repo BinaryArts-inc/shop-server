@@ -78,6 +78,6 @@ export class AuthService {
     const payload = { email: loginDto.email, id: loginDto.id }
     const token = await this.helperService.generateToken(payload, this.configService.get<IAuth>("auth").jwtSecret, "1d")
     const refreshToken = await this.helperService.generateToken(payload, this.configService.get<IAuth>("auth").refreshSecret, "30d")
-    return { user, tokens: { acecess_token: token, refreshToken } }
+    return { user, tokens: { accessToken: token, refreshToken } }
   }
 }
