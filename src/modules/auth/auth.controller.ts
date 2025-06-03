@@ -1,24 +1,53 @@
-import { Controller, Post, Body, HttpCode, Patch, UseGuards, Req, UseInterceptors } from "@nestjs/common"
+import { Request } from "express"
 import { AuthService } from "./auth.service"
+import { Public } from "./decorators/public.decorator"
+import { Controller, Post, Body, HttpCode, Patch, UseGuards, Req, UseInterceptors } from "@nestjs/common"
 import { JoiValidationPipe } from "@/validations/joi.validation"
 import { AuthDto, registerSchema, ResendOtpDto, resendOtpSchema, VerifyEmailDto, verifyEmailSchema } from "./dto/auth.dto"
-import { Public } from "./decorators/public.decorator"
 import JwtShortTimeGuard from "./guard/jwt-short-time.guard"
-import { Request } from "express"
 import { PasswordAuthGuard } from "./guard/passport-auth.guard"
 import { LoginValidationGuard } from "./guard/login-validation.guard"
 import { Short_Time } from "./decorators/short-time.decorator"
 import { AuthInterceptor } from "./interceptors/auth.interceptor"
+import { HelpersService } from "../services/utils/helpers/helpers.service"
+import { MailService } from "../services/mail/mail.service"
+import { UserService } from "../user/user.service"
+import { ConfigService } from "@nestjs/config"
+import { IAuth } from "@/config/auth.config"
+import { TransactionHelper } from "../services/utils/transactions/transactions.service"
 
 @Public()
 @Controller("auth")
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private helperService: HelpersService,
+    private mailService: MailService,
+    private userService: UserService,
+    private configService: ConfigService,
+    private readonly transactionHelper: TransactionHelper
+  ) {}
 
   @Post("/register")
   @HttpCode(201)
   async register(@Body(new JoiValidationPipe(registerSchema)) registerDto: AuthDto) {
-    return await this.authService.register(registerDto)
+    return this.transactionHelper.runInTransaction(async (manager) => {
+      const { email, id } = await this.userService.create(registerDto, manager)
+
+      const code = this.helperService.generateOtp(6)
+
+      const otp = await this.authService.saveOtp({ code, email }, manager)
+
+      this.mailService.send({
+        to: registerDto.email,
+        subject: "Email Validation",
+        text: `Validate with your otp code: ${otp.code}. Your code expires in 10mins`
+      })
+
+      const shortTimeToken = await this.helperService.generateToken({ email, id }, this.configService.get<IAuth>("auth").shortTimeJwtSecret, "1h")
+
+      return { token: shortTimeToken }
+    })
   }
 
   @Post("/login/password")
@@ -34,11 +63,15 @@ export class AuthController {
   @HttpCode(200)
   @UseGuards(JwtShortTimeGuard)
   async verifyEmail(@Body(new JoiValidationPipe(verifyEmailSchema)) verifyEmailDto: VerifyEmailDto) {
-    return await this.authService.verifyEmail(verifyEmailDto.code)
+    console.log("verify e", verifyEmailDto)
+
+    // return await this.authService.verifyEmail(verifyEmailDto.code)
   }
 
   @Patch("/resendotp")
   async resendOtp(@Body(new JoiValidationPipe(resendOtpSchema)) otpDto: ResendOtpDto) {
-    return this.authService.resendOtp(otpDto.email)
+    console.log("ot", otpDto)
+
+    // return this.authService.resendOtp(otpDto.email)
   }
 }
