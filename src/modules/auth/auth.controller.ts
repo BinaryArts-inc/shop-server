@@ -1,10 +1,9 @@
 import { Controller, Post, Body, HttpCode, Patch, UseGuards, Req, UseInterceptors } from "@nestjs/common"
 import { AuthService } from "./auth.service"
 import { JoiValidationPipe } from "@/validations/joi.validation"
-import { AuthDto, registerSchema, ResendOtpDto, resendOtpSchema, verifyEmailDto, verifyEmailSchema } from "./dto/auth.dto"
+import { AuthDto, registerSchema, ResendOtpDto, resendOtpSchema, VerifyEmailDto, verifyEmailSchema } from "./dto/auth.dto"
 import { Public } from "./decorators/public.decorator"
 import JwtShortTimeGuard from "./guard/jwt-short-time.guard"
-import { AuthGuard } from "@nestjs/passport"
 import { Request } from "express"
 import { PasswordAuthGuard } from "./guard/passport-auth.guard"
 import { LoginValidationGuard } from "./guard/login-validation.guard"
@@ -34,7 +33,7 @@ export class AuthController {
   @Post("/verifyemail")
   @HttpCode(200)
   @UseGuards(JwtShortTimeGuard)
-  async verifyEmail(@Body(new JoiValidationPipe(verifyEmailSchema)) verifyEmailDto: verifyEmailDto) {
+  async verifyEmail(@Body(new JoiValidationPipe(verifyEmailSchema)) verifyEmailDto: VerifyEmailDto) {
     return await this.authService.verifyEmail(verifyEmailDto.code)
   }
 

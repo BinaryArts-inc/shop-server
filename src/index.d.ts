@@ -45,8 +45,4 @@ declare global {
   export interface CustomFile extends Express.Multer.File {
     extension?: string
   }
-
-  interface IInterceptor {
-    transform(data: unknown): unknown
-  }
 }

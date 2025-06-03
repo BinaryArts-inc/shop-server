@@ -10,7 +10,7 @@ export class AuthDto {
   confirmPassword: string
 }
 
-export class verifyEmailDto {
+export class VerifyEmailDto {
   code: number
 }
 
