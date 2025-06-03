@@ -1,16 +1,16 @@
 import * as fs from "fs"
 import { Injectable } from "@nestjs/common"
 import { DeleteObjectCommand, GetObjectCommand, PutObjectCommand, S3Client, ObjectCannedACL } from "@aws-sdk/client-s3"
-
-import { DOSpacesOptions } from "./interfaces/config.interface"
-import { FileUploadDto, IFileoptionsConfigurator, IFileSystemService } from "./interfaces/filesystem.interface"
+import { FileUploadDto, IFileoptionsConfigurator, IFileSystemService } from "../interfaces/filesystem.interface"
 import { ApiException } from "@/exceptions/api.exception"
+import { DOSpacesOptions } from "../interfaces/config.interface"
 
 @Injectable()
-export class DigitalOceanService implements IFileSystemService, IFileoptionsConfigurator {
+export class DigitalOceanStrategy implements IFileSystemService, IFileoptionsConfigurator {
   private clients: S3Client
   private bucket: string
   private endpoint: string
+  private cdnEndPoint: string
 
   async upload(file: FileUploadDto): Promise<string> {
     if (!file.filePath && !file.buffer) {
@@ -44,6 +44,7 @@ export class DigitalOceanService implements IFileSystemService, IFileoptionsConf
       throw new ApiException(error.message, 500)
     }
   }
+
   async get(path: string): Promise<Buffer> {
     const response = await this.clients.send(
       new GetObjectCommand({
@@ -52,12 +53,14 @@ export class DigitalOceanService implements IFileSystemService, IFileoptionsConf
       })
     )
 
-    return Buffer.from(await response.Body!.transformToByteArray())
+    return Buffer.from(await response.Body.transformToByteArray())
   }
+
   async update(path: string, file: FileUploadDto): Promise<string> {
     await this.delete(path)
     return this.upload(file)
   }
+
   async delete(path: string): Promise<void> {
     await this.clients.send(
       new DeleteObjectCommand({
@@ -66,19 +69,24 @@ export class DigitalOceanService implements IFileSystemService, IFileoptionsConf
       })
     )
   }
+
   setOptions(options: DOSpacesOptions): IFileSystemService {
     const error = this.checkConfig(options)
     if (error) throw new ApiException(error, 500)
 
+    const endpoint = `https://${options.bucket}/${options.region}.digitaloceanspaces.com`
+
     this.bucket = options.bucket
-    this.endpoint = options.endpoint || `https://${options.bucket}/${options.region}.digitaloceanspaces.com`
+    this.endpoint = endpoint
+    this.cdnEndPoint = `https://${options.bucket}/${options.region}.cdn.digitaloceanspaces.com`
 
     this.clients = new S3Client({
       credentials: {
         accessKeyId: options.key,
         secretAccessKey: options.secret
       },
-      endpoint: options.endpoint,
+
+      endpoint: endpoint,
       forcePathStyle: true,
       region: options.region
     })

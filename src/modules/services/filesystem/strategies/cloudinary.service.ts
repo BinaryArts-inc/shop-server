@@ -1,22 +1,23 @@
+import * as fs from "fs"
 import { Injectable } from "@nestjs/common"
 import { v2 as cloudinary, UploadApiResponse, UploadApiErrorResponse } from "cloudinary"
-import * as fs from "fs"
-import { FileUploadDto, IFileoptionsConfigurator, IFileSystemService } from "./interfaces/filesystem.interface"
-import { CloudinaryStorageOptions } from "./interfaces/config.interface"
+
 import { ApiException } from "@/exceptions/api.exception"
+import { FileUploadDto, IFileoptionsConfigurator, IFileSystemService } from "../interfaces/filesystem.interface"
+import { CloudinaryStorageOptions } from "../interfaces/config.interface"
 
 export type CloudinaryType = UploadApiErrorResponse | UploadApiResponse
 
 @Injectable()
-export class CloudinaryService implements IFileSystemService, IFileoptionsConfigurator {
+export class CloudinaryStrategy implements IFileSystemService, IFileoptionsConfigurator {
   private options: CloudinaryStorageOptions
 
   setOptions(options: CloudinaryStorageOptions): IFileSystemService {
     this.options = options
     cloudinary.config({
-      cloud_name: options.cloud_name,
-      api_key: options.api_key,
-      api_secret: options.api_secret
+      cloud_name: options.cloudName,
+      api_key: options.apiKey,
+      api_secret: options.apiSecret
     })
     return this
   }
@@ -26,9 +27,11 @@ export class CloudinaryService implements IFileSystemService, IFileoptionsConfig
       if (!fs.existsSync(file.filePath)) {
         throw new Error(`File does not exist ${file.filePath}`)
       }
+
       const result = await cloudinary.uploader.upload(file.filePath, {
         resource_type: file.mimetype.startsWith("video") ? "video" : file.mimetype.startsWith("image") ? "image" : "raw"
       })
+
       fs.unlinkSync(file.filePath)
       return result.secure_url
     } catch (error) {

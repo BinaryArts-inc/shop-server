@@ -1,12 +1,13 @@
-import { Injectable } from "@nestjs/common"
-import { FileUploadDto, IFileoptionsConfigurator, IFileSystemService } from "./interfaces/filesystem.interface"
-import { S3Options } from "./interfaces/config.interface"
-import { DeleteObjectCommand, GetObjectCommand, ObjectCannedACL, PutObjectCommand, S3Client } from "@aws-sdk/client-s3"
 import * as fs from "fs"
+import { Injectable } from "@nestjs/common"
+import { DeleteObjectCommand, GetObjectCommand, ObjectCannedACL, PutObjectCommand, S3Client } from "@aws-sdk/client-s3"
+
 import { ApiException } from "@/exceptions/api.exception"
+import { S3Options } from "../interfaces/config.interface"
+import { FileUploadDto, IFileoptionsConfigurator, IFileSystemService } from "../interfaces/filesystem.interface"
 
 @Injectable()
-export class S3Service implements IFileSystemService, IFileoptionsConfigurator {
+export class S3Strategy implements IFileSystemService, IFileoptionsConfigurator {
   private client: S3Client
   private bucket: string
   private endpoint: string
@@ -49,13 +50,14 @@ export class S3Service implements IFileSystemService, IFileoptionsConfigurator {
       })
     )
 
-    return Buffer.from(await response.Body!.transformToByteArray())
+    return Buffer.from(await response.Body.transformToByteArray())
   }
 
   async update(path: string, file: FileUploadDto): Promise<string> {
     await this.delete(path)
     return this.upload(file)
   }
+
   async delete(path: string): Promise<void> {
     await this.client.send(
       new DeleteObjectCommand({
@@ -64,9 +66,10 @@ export class S3Service implements IFileSystemService, IFileoptionsConfigurator {
       })
     )
   }
+
   setOptions(options: S3Options): IFileSystemService {
     this.bucket = options.bucket
-    this.endpoint = options.endpoint || `https://${options.bucket}.s3.${options.region}.amazonaws.com` // saving to amazon
+    this.endpoint = `https://${options.bucket}.s3.${options.region}.amazonaws.com` // saving to amazon
     // this.endpoint = options.endpoint ||  `htts://${options.bucket}.s3.${options.region}.digitaloceanspaces.com`; // saving to digitalocean
 
     this.client = new S3Client({
@@ -74,7 +77,7 @@ export class S3Service implements IFileSystemService, IFileoptionsConfigurator {
         accessKeyId: options.key,
         secretAccessKey: options.secret
       },
-      endpoint: options.endpoint,
+      endpoint: this.endpoint,
       forcePathStyle: true,
       region: options.region
     })

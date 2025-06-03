@@ -25,7 +25,6 @@ export type S3Options = {
   bucket: string
   region: string
   secret: string
-  endpoint?: string
 }
 
 export type DOSpacesOptions = {
@@ -34,7 +33,6 @@ export type DOSpacesOptions = {
   secret: string
   bucket: string
   region: string
-  endpoint: string
 }
 
 export type GoogleStorageOptions = {
@@ -46,10 +44,10 @@ export type GoogleStorageOptions = {
 }
 
 export type CloudinaryStorageOptions = {
-   driver: 'cloudinary'
-  cloud_name: string
-  api_key: string
-  api_secret: string
+  driver: "cloudinary"
+  cloudName: string
+  apiKey: string
+  apiSecret: string
 }
 
 export type FileSystemDriver = "local" | "s3" | "google" | "spaces" | "cloudinary"

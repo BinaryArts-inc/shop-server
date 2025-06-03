@@ -1,14 +1,12 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-
-import { Injectable } from "@nestjs/common"
-import { FileUploadDto, IFileoptionsConfigurator, IFileSystemService } from "./interfaces/filesystem.interface"
-import { GoogleStorageOptions } from "./interfaces/config.interface"
-import { Storage, Bucket } from "@google-cloud/storage"
 import * as fs from "fs"
+import { Injectable } from "@nestjs/common"
+import { Storage, Bucket } from "@google-cloud/storage"
+import { FileUploadDto, IFileoptionsConfigurator, IFileSystemService } from "../interfaces/filesystem.interface"
 import { ApiException } from "@/exceptions/api.exception"
+import { GoogleStorageOptions } from "../interfaces/config.interface"
 
 @Injectable()
-export class GoogleStorageService implements IFileSystemService, IFileoptionsConfigurator {
+export class GoogleStorageStrategy implements IFileSystemService, IFileoptionsConfigurator {
   private storage: Storage
   private bucket: Bucket
   private bucketName: string
@@ -33,6 +31,8 @@ export class GoogleStorageService implements IFileSystemService, IFileoptionsCon
 
       return new Promise((resolve, reject) => {
         blobStream.on("error", (error) => {
+          console.log("Google upload error: ", error)
+
           reject(new ApiException(`Failed to upload file to Google `, 500))
         })
 
@@ -50,6 +50,7 @@ export class GoogleStorageService implements IFileSystemService, IFileoptionsCon
       throw new ApiException(`Failed to upload to Google`, 500)
     }
   }
+
   async get(path: string): Promise<Buffer> {
     try {
       const [fileContent] = await this.bucket.file(path).download()
@@ -58,10 +59,12 @@ export class GoogleStorageService implements IFileSystemService, IFileoptionsCon
       throw new ApiException(`Failed to download fle from Google Storage: ${error.message}`, 500)
     }
   }
+
   async update(path: string, file: FileUploadDto): Promise<string> {
     await this.delete(path)
     return this.upload(file)
   }
+
   async delete(path: string): Promise<void> {
     try {
       await this.bucket.file(path).delete()
@@ -69,6 +72,7 @@ export class GoogleStorageService implements IFileSystemService, IFileoptionsCon
       throw new ApiException(`Failed to delete file from Google Storage: ${error.message}`, 500)
     }
   }
+
   setOptions(options: GoogleStorageOptions): IFileSystemService {
     this.storage = new Storage({
       projectId: options.projectId,
