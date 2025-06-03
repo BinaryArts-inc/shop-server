@@ -55,6 +55,26 @@ export class FileSystemModule {
           useFactory: options.useFactory,
           inject: options.inject || []
         },
+        {
+          provide: FILESYSTEM_STRATEGY.local,
+          useClass: LocalFsStrategy
+        },
+        {
+          provide: FILESYSTEM_STRATEGY.aws,
+          useClass: S3Strategy
+        },
+        {
+          provide: FILESYSTEM_STRATEGY.google,
+          useClass: GoogleStorageStrategy
+        },
+        {
+          provide: FILESYSTEM_STRATEGY.digitalOcean,
+          useClass: DigitalOceanStrategy
+        },
+        {
+          provide: FILESYSTEM_STRATEGY.cloudinary,
+          useClass: DigitalOceanStrategy
+        },
         FileSystemService
       ],
       exports: [FileSystemService]
