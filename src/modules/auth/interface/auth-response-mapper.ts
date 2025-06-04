@@ -22,7 +22,7 @@ export abstract class AuthResponseMapper implements IInterceptor {
         updatedAt: data.user.business.store.updateAt
       },
       tokens: {
-        acecess_token: data.tokens.acecess_token,
+        accessToken: data.tokens.accessToken,
         refreshToken: data.tokens.refreshToken
       }
     }
