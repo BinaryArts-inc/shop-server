@@ -21,7 +21,9 @@ export class HelpersService {
   }
 
   async generateToken(payload: { email: string; id: string }, secret: string, expiresIn: string) {
-    const token = this.jwtService.sign(payload, { secret: secret, expiresIn: expiresIn })
+    console.log("i got here", payload, secret, expiresIn)
+
+    const token = await this.jwtService.signAsync(payload, { secret, expiresIn: 60 })
     return token
   }
 

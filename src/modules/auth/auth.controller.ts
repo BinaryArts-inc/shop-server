@@ -15,6 +15,8 @@ import { UserService } from "../user/user.service"
 import { ConfigService } from "@nestjs/config"
 import { IAuth } from "@/config/auth.config"
 import { TransactionHelper } from "../services/utils/transactions/transactions.service"
+import { NotFoundException } from "@/exceptions/notfound.exception"
+import { JwtService } from "@nestjs/jwt"
 
 @Public()
 @Controller("auth")
@@ -62,16 +64,42 @@ export class AuthController {
   @Post("/verifyemail")
   @HttpCode(200)
   @UseGuards(JwtShortTimeGuard)
-  async verifyEmail(@Body(new JoiValidationPipe(verifyEmailSchema)) verifyEmailDto: VerifyEmailDto) {
-    console.log("verify e", verifyEmailDto)
+  async verifyEmail(@Req() req: Request, @Body(new JoiValidationPipe(verifyEmailSchema)) verifyEmailDto: VerifyEmailDto) {
+    const payload = req.payload
 
-    // return await this.authService.verifyEmail(verifyEmailDto.code)
+    const user = await this.userService.findById(payload.id)
+    const isVerified = await this.authService.verifyCode({ email: payload.email, code: verifyEmailDto.code })
+    await this.userService.update(user, { isEmailVerified: isVerified })
+
+    const shortTimeToken = await this.helperService.generateToken(
+      { email: payload.email, id: user.id },
+      this.configService.get<IAuth>("auth").shortTimeJwtSecret,
+      "1h"
+    )
+
+    return { token: shortTimeToken }
   }
 
   @Patch("/resendotp")
-  async resendOtp(@Body(new JoiValidationPipe(resendOtpSchema)) otpDto: ResendOtpDto) {
-    console.log("ot", otpDto)
+  async resendOtp(@Body(new JoiValidationPipe(resendOtpSchema)) { email }: ResendOtpDto) {
+    const user = await this.userService.findOne({ email })
+    if (!user) throw new NotFoundException("user not found")
 
-    // return this.authService.resendOtp(otpDto.email)
+    const code = this.helperService.generateOtp(6)
+    const otp = await this.authService.saveOtp({ code, email })
+
+    await this.mailService.send({
+      to: email,
+      subject: "Email Validation",
+      text: `Validate with your otp code: ${otp.code}. Your code expires in 10mins`
+    })
+
+    const shortTimeToken = await this.helperService.generateToken(
+      { email, id: user.id },
+      this.configService.get<IAuth>("auth").shortTimeJwtSecret,
+      "1h"
+    )
+
+    return { token: shortTimeToken }
   }
 }

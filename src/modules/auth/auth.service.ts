@@ -10,7 +10,7 @@ import { BadReqException } from "@/exceptions/badRequest.exception"
 import User from "../user/entity/user.entity"
 import { InjectRepository } from "@nestjs/typeorm"
 import { Otp } from "./entities/otp.entity"
-import { EntityManager, Repository } from "typeorm"
+import { EntityManager, FindOptionsWhere, MoreThan, Repository } from "typeorm"
 import { DateService } from "../services/utils/date/date.service"
 import { SaveOtpDto } from "./dto/save-otp.dto"
 
@@ -61,23 +61,12 @@ export class AuthService {
     return repo.findOne({ where: { email } })
   }
 
-  // async resendOtp(email: string) {
-  //   console.log("email", email)
+  async verifyCode({ email, code }: FindOptionsWhere<Otp>) {
+    const otp = await this.otpRepository.findOne({ where: { email, code, expireAt: MoreThan(new Date()) } })
+    if (!otp) throw new NotFoundException("OTP not found")
 
-  //   // const otp = await this.userService.generateOtp(6, email)
-  //   // const user = await this.userService.findOne({ email: otp.email })
-  //   // const payload = {
-  //   //   email: user.email,
-  //   //   id: user.id
-  //   // }
-  //   // const token = await this.helperService.generateToken(payload, this.configService.get<IAuth>("auth").shortTimeJwtSecret, "1h")
-  //   // this.mailService.send({
-  //   //   to: user.email,
-  //   //   subject: "otp code",
-  //   //   text: `Validate with your otp code: ${otp.code}. Your code expires in 10mins`
-  //   // })
-  //   return { token: "" }
-  // }
+    return true
+  }
 
   // async verifyEmail(code: number) {
   //   const otp = await this.userService.findUserOtp({ code })
