@@ -16,7 +16,6 @@ import { ConfigService } from "@nestjs/config"
 import { IAuth } from "@/config/auth.config"
 import { TransactionHelper } from "../services/utils/transactions/transactions.service"
 import { NotFoundException } from "@/exceptions/notfound.exception"
-import { JwtService } from "@nestjs/jwt"
 
 @Public()
 @Controller("auth")

@@ -1,4 +1,4 @@
-import { Body, Controller, Patch, Post, Req, UseGuards } from "@nestjs/common"
+import { Body, Controller, Patch, Req, UseGuards } from "@nestjs/common"
 import { UserService } from "./user.service"
 import JwtShortTimeGuard from "../auth/guard/jwt-short-time.guard"
 import { JoiValidationPipe } from "@/validations/joi.validation"
