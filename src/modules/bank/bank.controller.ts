@@ -7,17 +7,28 @@ import { UserId } from "../user/decorator/user.decorator"
 import { BankInterceptor } from "./interceptors/bank.interceptor"
 import JwtShortTimeGuard from "../auth/guard/jwt-short-time.guard"
 import { Short_Time } from "../auth/decorators/short-time.decorator"
+import { NotFoundException } from "@/exceptions/notfound.exception"
+import { UserService } from "../user/user.service"
+import { ConflictException } from "@/exceptions/conflict.exception"
 
 @Controller("bank")
 export class BankController {
-  constructor(private readonly bankService: BankService) {}
+  constructor(
+    private readonly bankService: BankService,
+    private userService: UserService
+  ) {}
 
   @Short_Time()
   @Post()
   @UseGuards(JwtShortTimeGuard)
   @UseInterceptors(BankInterceptor)
   async create(@Body(new JoiValidationPipe(bankSchema)) createBankDto: CreateBankDto, @UserId() userId: string) {
-    return await this.bankService.create(createBankDto, userId)
+    const user = await this.userService.findOne({ id: userId })
+    if (!user) throw new NotFoundException("User not found")
+
+    if (await this.bankService.exist({ accountNumber: createBankDto.accountNumber })) throw new ConflictException("Bank credentials already exist")
+
+    return await this.bankService.create(createBankDto, user)
   }
 
   @Get()

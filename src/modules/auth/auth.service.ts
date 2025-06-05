@@ -3,7 +3,6 @@ import { UserService } from "../user/user.service"
 import { LoginAuthDto, LoginDto } from "./dto/auth.dto"
 import { ConfigService } from "@nestjs/config"
 import { IAuth } from "@/config/auth.config"
-import { MailService } from "../services/mail/mail.service"
 import { HelpersService } from "../services/utils/helpers/helpers.service"
 import { NotFoundException } from "@/exceptions/notfound.exception"
 import { BadReqException } from "@/exceptions/badRequest.exception"
@@ -21,32 +20,10 @@ export class AuthService {
     private helperService: HelpersService,
     private dateService: DateService,
     private configService: ConfigService,
-    private mailService: MailService,
 
     @InjectRepository(Otp)
     private otpRepository: Repository<Otp>
   ) {}
-
-  // refactors
-  // import otp repository in the auth service so it is not dependent on the user service
-  //
-  // async register(data: AuthDto) {
-  //   const createdUser = await this.userService.create(data)
-
-  //   const code = this.helperService.generateOtp(6)
-
-  //   // const otp = await this.userService.generateOtp(6, createdUser.email)
-
-  //   this.mailService.send({
-  //     to: createdUser.email,
-  //     subject: "Email Validation",
-  //     text: `Validate with your otp code: ${otp.code}. Your code expires in 10mins`
-  //   })
-
-  //   const payload = { email: createdUser.email, id: createdUser.id }
-  //   const token = await this.helperService.generateToken(payload, this.configService.get<IAuth>("auth").shortTimeJwtSecret, "1h")
-  //   return { token }
-  // }
 
   async saveOtp({ code, email }: SaveOtpDto, manager?: EntityManager) {
     const repo = manager ? manager.getRepository<Otp>(Otp) : this.otpRepository

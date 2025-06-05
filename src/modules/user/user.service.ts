@@ -4,13 +4,10 @@ import { InjectRepository } from "@nestjs/typeorm"
 import { EntityManager, FindOptionsWhere, Repository } from "typeorm"
 import { CreateUserDto } from "./dto/createUserDto"
 import { ConflictException } from "@/exceptions/conflict.exception"
-import { HelpersService } from "../services/utils/helpers/helpers.service"
 import { BadReqException } from "@/exceptions/badRequest.exception"
 import Business from "./entity/business.entity"
 import { CreateUserBusinessDto } from "./dto/business.dto"
 import { NotFoundException } from "@/exceptions/notfound.exception"
-import { ConfigService } from "@nestjs/config"
-import { IAuth } from "@/config/auth.config"
 import { UpdateUserDto } from "./dto/updateUserDto"
 
 @Injectable()
@@ -18,30 +15,9 @@ export class UserService implements IService<User> {
   constructor(
     @InjectRepository(User)
     private UserRepository: Repository<User>,
-    private helperServices: HelpersService,
     @InjectRepository(Business)
-    private businessRepository: Repository<Business>,
-    private configService: ConfigService
+    private businessRepository: Repository<Business>
   ) {}
-
-  // async generateOtp(number: number, email: string): Promise<Otp> {
-  //   const otpCode = this.helperServices.generateOtp(number)
-  //   const otpData = {
-  //     code: otpCode,
-  //     email,
-  //     expireAt: this.dateService.addMinutes(10)
-  //   }
-  //   await this.otpRepository.upsert(otpData, ["email"])
-  //   return this.otpRepository.findOne({ where: { email } })
-  // }
-
-  // async findUserOtp(filter: FindOptionsWhere<Otp>): Promise<Otp> {
-  //   return await this.otpRepository.findOne({ where: filter })
-  // }
-
-  // async deleteOtp(email: string): Promise<DeleteResult> {
-  //   return this.otpRepository.delete({ email: email })
-  // }
 
   async create(data: CreateUserDto, manager?: EntityManager): Promise<User> {
     const exist = await this.exists({ email: data.email })
@@ -88,21 +64,16 @@ export class UserService implements IService<User> {
     throw new Error("")
   }
 
-  async createUserBusiness(userBusinessDto: CreateUserBusinessDto, userId: string) {
-    const user = await this.findOne({ id: userId })
-    if (!user) throw new NotFoundException("User not found")
-
-    const existingBusiness = await this.businessRepository.findOne({ where: { user: { id: userId } } })
-    if (existingBusiness) throw new ConflictException("Business already exists for this user")
-
+  async createUserBusiness(userBusinessDto: CreateUserBusinessDto, user: User) {
     const business = this.businessRepository.create({
       ...userBusinessDto,
       user: user
     })
-    await this.businessRepository.save(business)
-    const payload = { email: user.email, id: user.id }
-    const token = await this.helperServices.generateToken(payload, this.configService.get<IAuth>("auth").shortTimeJwtSecret, "1h")
-    return { token }
+    return await this.businessRepository.save(business)
+  }
+
+  async findOneBusiness(filter: FindOptionsWhere<Business>) {
+    return await this.businessRepository.findOne({ where: filter, relations: ["user", "store"] })
   }
 
   async getUserBusiness(filter: FindOptionsWhere<Business>) {

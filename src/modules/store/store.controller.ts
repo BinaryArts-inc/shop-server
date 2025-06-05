@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFile, Req, UseGuards } from "@nestjs/common"
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFile, UseGuards } from "@nestjs/common"
 import { StoreService } from "./store.service"
 import { CreateStoreDto, storeSchema } from "./dto/create-store.dto"
 import { UpdateStoreDto } from "./dto/update-store.dto"
@@ -10,12 +10,21 @@ import { FileSystemService } from "../services/filesystem/filesystem.service"
 import { JoiValidationPipe } from "@/validations/joi.validation"
 import { UserId } from "../user/decorator/user.decorator"
 import { Short_Time } from "../auth/decorators/short-time.decorator"
+import { UserService } from "../user/user.service"
+import { NotFoundException } from "@/exceptions/notfound.exception"
+import { ConflictException } from "@/exceptions/conflict.exception"
+import { HelpersService } from "../services/utils/helpers/helpers.service"
+import { ConfigService } from "@nestjs/config"
+import { IAuth } from "@/config/auth.config"
 
 @Controller("store")
 export class StoreController {
   constructor(
     private readonly storeService: StoreService,
-    private fileSystemService: FileSystemService
+    private fileSystemService: FileSystemService,
+    private userService: UserService,
+    private helperService: HelpersService,
+    private configService: ConfigService
   ) {}
 
   @Short_Time()
@@ -39,7 +48,16 @@ export class StoreController {
       ...createStoreDto,
       logo: url
     }
-    return this.storeService.create(createStoreDto, userId)
+
+    const business = await this.userService.getUserBusiness({ user: { id: userId } })
+    if (!business) throw new NotFoundException("Business does not exist")
+
+    if (await this.storeService.exist({ name: createStoreDto.name })) throw new ConflictException("Store name already exist")
+
+    this.storeService.create(createStoreDto, business)
+    const payload = { email: business.user.email, id: business.user.id }
+    const token = await this.helperService.generateToken(payload, this.configService.get<IAuth>("auth").shortTimeJwtSecret, "1h")
+    return { token }
   }
 
   @Get()

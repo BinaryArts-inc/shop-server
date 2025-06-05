@@ -4,23 +4,15 @@ import { UpdateBankDto } from "./dto/update-bank.dto"
 import { InjectRepository } from "@nestjs/typeorm"
 import { Bank } from "./entities/bank.entity"
 import { FindOptionsWhere, Repository } from "typeorm"
-import { UserService } from "../user/user.service"
-import { NotFoundException } from "@/exceptions/notfound.exception"
-import { ConflictException } from "@/exceptions/conflict.exception"
+import User from "../user/entity/user.entity"
 
 @Injectable()
 export class BankService {
   constructor(
     @InjectRepository(Bank)
-    private bankRepository: Repository<Bank>,
-    private userService: UserService
+    private bankRepository: Repository<Bank>
   ) {}
-  async create(createBankDto: CreateBankDto, userId: string) {
-    const user = await this.userService.findOne({ id: userId })
-    if (!user) throw new NotFoundException("User not found")
-
-    if (await this.exist({ accountNumber: createBankDto.accountNumber })) throw new ConflictException("Bank credentials already exist")
-
+  async create(createBankDto: CreateBankDto, user: User) {
     const createbank = this.bankRepository.create({
       ...createBankDto,
       user: user
@@ -46,6 +38,7 @@ export class BankService {
   }
 
   update(id: number, updateBankDto: UpdateBankDto) {
+    console.log(updateBankDto)
     return `This action updates a #${id} bank`
   }
 
