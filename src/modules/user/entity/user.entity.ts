@@ -13,6 +13,7 @@ import {
 import * as bcrypt from "bcryptjs"
 import Business from "./business.entity"
 import { Bank } from "@/modules/bank/entities/bank.entity"
+import { Product } from "@/modules/products/entities/product.entity"
 
 export enum UserRoleEnum {
   "Customer" = "customer",
@@ -55,6 +56,9 @@ export default class User {
 
   @OneToMany(() => Bank, (bank) => bank.user)
   bank: Bank[]
+
+  @OneToMany(() => Product, (product) => product.user)
+  product: Product[]
 
   @BeforeInsert()
   @BeforeUpdate()

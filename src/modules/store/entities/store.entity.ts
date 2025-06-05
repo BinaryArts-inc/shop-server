@@ -1,5 +1,6 @@
+import { Product } from "@/modules/products/entities/product.entity"
 import Business from "@/modules/user/entity/business.entity"
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToOne, BeforeInsert, BeforeUpdate } from "typeorm"
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToOne, OneToMany } from "typeorm"
 
 @Entity()
 export class Store {
@@ -22,6 +23,9 @@ export class Store {
 
   @OneToOne(() => Business, (business) => business.store, { nullable: true, onDelete: "SET NULL" })
   business: Business
+
+  @OneToMany(() => Product, (product) => product.store)
+  product: Product[]
 
   @CreateDateColumn()
   createdAt: Date
