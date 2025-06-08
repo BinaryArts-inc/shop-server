@@ -35,10 +35,16 @@ export class Product {
   @Column({ type: "enum", enum: ProductStatusEnum, default: ProductStatusEnum.draft })
   status: ProductStatusEnum
 
-  @ManyToOne(() => Store, (store) => store.product)
+  @Column()
+  storeId: string
+
+  @Column()
+  userId: string
+
+  @ManyToOne(() => Store, (store) => store.product, { eager: true })
   store: Store
 
-  @ManyToOne(() => User, (user) => user.product)
+  @ManyToOne(() => User, (user) => user.product, { eager: true })
   user: User
 
   @CreateDateColumn()

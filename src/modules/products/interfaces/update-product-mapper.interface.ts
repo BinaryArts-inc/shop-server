@@ -13,8 +13,8 @@ export class DtoMapper {
       price: dto.price ?? product.price,
       status: dto.status ?? product.status,
       stockCount: dto.stockCount ?? product.stockCount,
-      user: dto.user ?? product.user,
-      store: dto.store ?? product.store,
+      userId: dto.userId ?? product.userId,
+      storeId: dto.storeId ?? product.storeId,
       images
     }
   }

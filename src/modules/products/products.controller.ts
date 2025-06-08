@@ -11,7 +11,6 @@ import { NotFoundException } from "@/exceptions/notfound.exception"
 import { FileSystemService } from "../services/filesystem/filesystem.service"
 import { FileUploadDto } from "../services/filesystem/interfaces/filesystem.interface"
 import { BadReqException } from "@/exceptions/badRequest.exception"
-import { Store } from "../store/entities/store.entity"
 import { DtoMapper } from "./interfaces/update-product-mapper.interface"
 import { ProductsInterceptor } from "./interceptors/products.interceptor"
 import { ProductInterceptor } from "./interceptors/product.interceptor"
@@ -35,7 +34,7 @@ export class ProductsController {
   ) {
     // find the store
     const store = await this.storeService.findOne({ id: createProductDto.storeId })
-    if (!store) throw new NotFoundException("No store to create product with, create a store before creating a product")
+    if (!store) throw new NotFoundException("store not found")
 
     // handle multiple image upload
     const handleImageUploaded = await Promise.all(
@@ -51,13 +50,10 @@ export class ProductsController {
       })
     )
     // attach the arry of string
-    createProductDto = {
-      ...createProductDto,
-      images: handleImageUploaded
-    }
+    createProductDto = { ...createProductDto, images: handleImageUploaded }
     const user = req.user
 
-    return await this.productsService.create(createProductDto, user, store)
+    return await this.productsService.create({ ...createProductDto, user: user, store: store })
   }
 
   @Get()
@@ -81,16 +77,16 @@ export class ProductsController {
     @UploadedFiles() uploadedFiles: Array<CustomFile>
   ) {
     const user = req.user
+
     const product = await this.productsService.findOne({ id: id })
 
     if (!product) throw new NotFoundException("Product does not exist")
 
-    let store: Store = null
     if (updateProductDto.storeId) {
-      store = await this.storeService.findOne({ id: updateProductDto.storeId })
+      const store = await this.storeService.findOne({ id: updateProductDto.storeId })
       if (!store) throw new BadReqException("Store does not exist")
     }
-    store = store ?? product.store
+
     // check if user owns product
     const ownsProduct = product.user.id === user.id
 
@@ -100,8 +96,7 @@ export class ProductsController {
 
     const updateProduct: UpdateProductDto = {
       ...updateProductDto,
-      user: product.user,
-      store: store
+      userId: product.user.id
     }
 
     // prepare to update product

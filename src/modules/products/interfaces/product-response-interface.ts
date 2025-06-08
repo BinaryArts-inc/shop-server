@@ -10,25 +10,8 @@ export interface IProductResponse {
   stockCount: number
   images: string[]
   status: ProductStatusEnum
-  store: {
-    id: string
-    name: string
-    category: string
-    logo: string
-    description: string
-    createdAt: Date
-    updatedAt: Date
-  }
-  user: {
-    id: string
-    firstName: string
-    lastName: string
-    email: string
-    fullName: () => void
-    role: string
-    createdAt: Date
-    updatedAt: Date
-  }
+  store: IdName
+  user: IdName
   createdAt: Date
   updateAt: Date
 }

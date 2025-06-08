@@ -1,7 +1,8 @@
-import User from "@/modules/user/entity/user.entity"
+import { Store } from "@/modules/store/entities/store.entity"
 import { ProductStatusEnum } from "../entities/product.entity"
 import * as joi from "joi"
-import { Store } from "@/modules/store/entities/store.entity"
+import User from "@/modules/user/entity/user.entity"
+
 export class CreateProductDto {
   name: string
   price: number
@@ -11,9 +12,10 @@ export class CreateProductDto {
   stockCount: number
   status: ProductStatusEnum
   storeId: string
+  userId: string
+  store: Store
+  user: User
   images: string[]
-  user?: User
-  store?: Store
 }
 
 export const createProductSchema = joi.object({

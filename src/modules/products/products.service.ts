@@ -3,8 +3,6 @@ import { CreateProductDto } from "./dto/create-product.dto"
 import { UpdateProductDto } from "./dto/update-product.dto"
 import { Product } from "./entities/product.entity"
 import { FindOptionsWhere, Repository } from "typeorm"
-import { Store } from "../store/entities/store.entity"
-import User from "../user/entity/user.entity"
 import { InjectRepository } from "@nestjs/typeorm"
 import { BadReqException } from "@/exceptions/badRequest.exception"
 import { FileUploadDto } from "../services/filesystem/interfaces/filesystem.interface"
@@ -44,14 +42,11 @@ export class ProductsService {
     return [...existingImages, ...uploadedUrls]
   }
 
-  async create(createProductDto: CreateProductDto, user: User, store: Store): Promise<Product> {
-    const createProduct = this.productRepository.create({
-      ...createProductDto,
-      store: store,
-      user: user
-    })
+  async create(createProductDto: CreateProductDto): Promise<Product> {
+    const createProduct = this.productRepository.create({ ...createProductDto })
 
     const product = await this.productRepository.save(createProduct)
+
     return product
   }
 

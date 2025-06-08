@@ -15,22 +15,11 @@ export abstract class ProductResponseMapper implements IInterceptor {
       stockCount: data.stockCount,
       store: {
         id: data.store.id,
-        category: data.store.category,
-        description: data.store.description,
-        logo: data.store.logo,
-        name: data.store.name,
-        createdAt: data.store.createdAt,
-        updatedAt: data.store.updateAt
+        name: data.store.name
       },
       user: {
         id: data.user.id,
-        email: data.user.email,
-        firstName: data.user.firstName,
-        lastName: data.user.lastName,
-        fullName: data.user.fullName,
-        role: data.user.role,
-        createdAt: data.user.createdAt,
-        updatedAt: data.user.updatedAt
+        name: data.user.getFullName()
       },
       createdAt: data.createdAt,
       updateAt: data.updatedAt
