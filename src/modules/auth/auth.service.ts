@@ -6,7 +6,6 @@ import { IAuth } from "@/config/auth.config"
 import { HelpersService } from "../services/utils/helpers/helpers.service"
 import { NotFoundException } from "@/exceptions/notfound.exception"
 import { BadReqException } from "@/exceptions/badRequest.exception"
-import User from "../user/entity/user.entity"
 import { InjectRepository } from "@nestjs/typeorm"
 import { Otp } from "./entities/otp.entity"
 import { EntityManager, FindOptionsWhere, MoreThan, Repository } from "typeorm"
@@ -68,10 +67,10 @@ export class AuthService {
     return user
   }
 
-  async login(loginDto: LoginAuthDto, user: User) {
+  async login(loginDto: LoginAuthDto) {
     const payload = { email: loginDto.email, id: loginDto.id }
     const token = await this.helperService.generateToken(payload, this.configService.get<IAuth>("auth").jwtSecret, "1d")
     const refreshToken = await this.helperService.generateToken(payload, this.configService.get<IAuth>("auth").refreshSecret, "30d")
-    return { user, tokens: { accessToken: token, refreshToken } }
+    return { accessToken: token, refreshToken }
   }
 }

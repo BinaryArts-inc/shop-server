@@ -4,7 +4,6 @@ import { UpdateBankDto } from "./dto/update-bank.dto"
 import { InjectRepository } from "@nestjs/typeorm"
 import { Bank } from "./entities/bank.entity"
 import { FindOptionsWhere, Repository } from "typeorm"
-import User from "../user/entity/user.entity"
 
 @Injectable()
 export class BankService {
@@ -12,17 +11,10 @@ export class BankService {
     @InjectRepository(Bank)
     private bankRepository: Repository<Bank>
   ) {}
-  async create(createBankDto: CreateBankDto, user: User) {
-    const createbank = this.bankRepository.create({
-      ...createBankDto,
-      user: user
-    })
+  async create(createBankDto: CreateBankDto) {
+    const createbank = this.bankRepository.create({ ...createBankDto })
 
-    const savedBank = await this.bankRepository.save(createbank)
-
-    const bank = await this.findOne({ id: savedBank.id })
-
-    return bank
+    return await this.bankRepository.save(createbank)
   }
 
   findAll() {

@@ -11,11 +11,7 @@ export abstract class BankResponseMapper implements IInterceptor {
       user: {
         id: bank.user.id,
         email: bank.user.email,
-        firstName: bank.user.firstName,
-        lastName: bank.user.lastName,
-        role: bank.user.role,
-        createdAt: bank.user.createdAt,
-        updatedAt: bank.user.updatedAt
+        fullName: bank.user.getFullName()
       },
       createdAt: bank.createdAt,
       updatedAt: bank.updatedAt

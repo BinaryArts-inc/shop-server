@@ -5,12 +5,8 @@ export interface IBankResponse {
   accountNumber: string
   user: {
     id: string
-    role: string
-    firstName: string
-    lastName: string
+    fullName: string
     email: string
-    createdAt: Date
-    updatedAt: Date
   }
   createdAt: Date
   updatedAt: Date

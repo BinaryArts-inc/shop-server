@@ -61,7 +61,7 @@ export default class User {
     return await bcrypt.compare(password, this.password)
   }
 
-  fullName() {
+  getFullName() {
     return this.firstName + " " + this.lastName
   }
 }

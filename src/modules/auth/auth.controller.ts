@@ -124,7 +124,8 @@ export class AuthController {
     this.storeService.create(onboardStoreDto, business)
 
     const payload = { email: business.user.email, id: business.user.id }
-    const token = await this.helperService.generateToken(payload, this.configService.get<IAuth>("auth").shortTimeJwtSecret, "1h")
+    const { accessToken: token } = await this.authService.login(payload)
+
     return { token }
   }
 
@@ -133,7 +134,9 @@ export class AuthController {
   @UseInterceptors(AuthInterceptor)
   @UseGuards(LoginValidationGuard, PasswordAuthGuard)
   async login(@Req() req: Request) {
-    return await this.authService.login({ email: req.user.email, id: req.user.id }, req.user)
+    const tokens = await this.authService.login({ email: req.user.email, id: req.user.id })
+
+    return { user: req.user, tokens }
   }
 
   @Patch("/resendotp")
