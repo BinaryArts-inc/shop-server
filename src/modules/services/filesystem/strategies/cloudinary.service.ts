@@ -1,24 +1,34 @@
 import * as fs from "fs"
-import { Injectable } from "@nestjs/common"
+import { Inject, Injectable } from "@nestjs/common"
 import { v2 as cloudinary, UploadApiResponse, UploadApiErrorResponse } from "cloudinary"
 
 import { ApiException } from "@/exceptions/api.exception"
 import { FileUploadDto, IFileoptionsConfigurator, IFileSystemService } from "../interfaces/filesystem.interface"
-import { CloudinaryStorageOptions } from "../interfaces/config.interface"
+import { CloudinaryStorageOptions, FileSystemModuleOptions } from "../interfaces/config.interface"
+import { CONFIG_OPTIONS } from "../entities/config"
 
 export type CloudinaryType = UploadApiErrorResponse | UploadApiResponse
 
 @Injectable()
 export class CloudinaryStrategy implements IFileSystemService, IFileoptionsConfigurator {
-  private options: CloudinaryStorageOptions
+  constructor(
+    @Inject(CONFIG_OPTIONS)
+    protected fs: FileSystemModuleOptions
+  ) {
+    cloudinary.config({
+      cloud_name: fs.clients.cloudinary.cloudName,
+      api_key: fs.clients.cloudinary.apiKey,
+      api_secret: fs.clients.cloudinary.apiSecret
+    })
+  }
 
   setOptions(options: CloudinaryStorageOptions): IFileSystemService {
-    this.options = options
     cloudinary.config({
       cloud_name: options.cloudName,
       api_key: options.apiKey,
       api_secret: options.apiSecret
     })
+
     return this
   }
 

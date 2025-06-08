@@ -5,7 +5,7 @@ import { Controller, Post, Body, HttpCode, Patch, UseGuards, Req, UseInterceptor
 import { JoiValidationPipe } from "@/validations/joi.validation"
 import { AuthDto, registerSchema, ResendOtpDto, resendOtpSchema, VerifyEmailDto, verifyEmailSchema } from "./dto/auth.dto"
 import JwtShortTimeGuard from "./guard/jwt-short-time.guard"
-import { PasswordAuthGuard } from "./guard/passport-auth.guard"
+import { PasswordAuthGuard } from "./guard/password-auth.guard"
 import { LoginValidationGuard } from "./guard/login-validation.guard"
 import { Short_Time } from "./decorators/short-time.decorator"
 import { AuthInterceptor } from "./interceptors/auth.interceptor"
