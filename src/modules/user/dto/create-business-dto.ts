@@ -1,6 +1,6 @@
 import * as joi from "joi"
 
-export class CreateUserBusinessDto {
+export class CreateBusinessDto {
   type: string
   businessRegNumber?: string
   contactNumber: string
@@ -11,7 +11,7 @@ export class CreateUserBusinessDto {
   identificationNumber: string
 }
 
-export const createUserBusinessSchema = joi.object({
+export const createBusinessSchema = joi.object({
   type: joi.string().required(),
   businessRegNumber: joi.string().optional().allow(null, ""),
   contactNumber: joi.string().required(),

@@ -1,7 +1,7 @@
 import { Request } from "express"
 import { AuthService } from "./auth.service"
 import { Public } from "./decorators/public.decorator"
-import { Controller, Post, Body, HttpCode, Patch, UseGuards, Req, UseInterceptors } from "@nestjs/common"
+import { Controller, Post, Body, HttpCode, Patch, UseGuards, Req, UseInterceptors, ConflictException } from "@nestjs/common"
 import { JoiValidationPipe } from "@/validations/joi.validation"
 import { AuthDto, registerSchema, ResendOtpDto, resendOtpSchema, VerifyEmailDto, verifyEmailSchema } from "./dto/auth.dto"
 import JwtShortTimeGuard from "./guard/jwt-short-time.guard"
@@ -16,6 +16,7 @@ import { ConfigService } from "@nestjs/config"
 import { IAuth } from "@/config/auth.config"
 import { TransactionHelper } from "../services/utils/transactions/transactions.service"
 import { NotFoundException } from "@/exceptions/notfound.exception"
+import { OnboardBusinessDto, onboardBusinessSchema } from "./dto/onboard-business.dto"
 
 @Public()
 @Controller("auth")
@@ -66,6 +67,24 @@ export class AuthController {
     )
 
     return { token: shortTimeToken }
+  }
+
+  @ShortTime()
+  @UseGuards(JwtShortTimeGuard)
+  @Post("/business")
+  async onboardBusiness(@Body(new JoiValidationPipe(onboardBusinessSchema)) userBusinessDto: OnboardBusinessDto, @Req() req: Request) {
+    const user = req.user
+
+    const business = await this.userService.findOneBusiness({ user: { id: user.id } })
+    if (business) throw new ConflictException("User already created a business")
+
+    await this.userService.createUserBusiness(userBusinessDto, user)
+
+    const payload = { email: user.email, id: user.id }
+
+    const token = await this.helperService.generateToken(payload, this.configService.get<IAuth>("auth").shortTimeJwtSecret, "1h")
+
+    return { token }
   }
 
   @Post("/login/password")

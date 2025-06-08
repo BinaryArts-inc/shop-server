@@ -2,13 +2,13 @@ import { Injectable } from "@nestjs/common"
 import User from "./entity/user.entity"
 import { InjectRepository } from "@nestjs/typeorm"
 import { EntityManager, FindOptionsWhere, Repository } from "typeorm"
-import { CreateUserDto } from "./dto/createUserDto"
+import { CreateUserDto } from "./dto/create-user-dto"
 import { ConflictException } from "@/exceptions/conflict.exception"
 import { BadReqException } from "@/exceptions/badRequest.exception"
 import Business from "./entity/business.entity"
-import { CreateUserBusinessDto } from "./dto/business.dto"
 import { NotFoundException } from "@/exceptions/notfound.exception"
-import { UpdateUserDto } from "./dto/updateUserDto"
+import { UpdateUserDto } from "./dto/update-user-dto"
+import { CreateBusinessDto } from "./dto/create-business-dto"
 
 @Injectable()
 export class UserService implements IService<User> {
@@ -64,11 +64,12 @@ export class UserService implements IService<User> {
     throw new Error("")
   }
 
-  async createUserBusiness(userBusinessDto: CreateUserBusinessDto, user: User) {
+  async createUserBusiness(userBusinessDto: CreateBusinessDto, user: User) {
     const business = this.businessRepository.create({
       ...userBusinessDto,
       user: user
     })
+
     return await this.businessRepository.save(business)
   }
 
