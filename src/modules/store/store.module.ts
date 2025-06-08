@@ -12,6 +12,7 @@ import { JwtModule } from "@nestjs/jwt"
 @Module({
   imports: [TypeOrmModule.forFeature([Store]), UserModule, SharedModule, ServicesModule, JwtModule.registerAsync(jwtConfig)],
   controllers: [StoreController],
-  providers: [StoreService]
+  providers: [StoreService],
+  exports: [StoreService]
 })
 export class StoreModule {}

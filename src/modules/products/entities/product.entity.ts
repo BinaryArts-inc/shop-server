@@ -2,7 +2,7 @@ import { Store } from "@/modules/store/entities/store.entity"
 import User from "@/modules/user/entity/user.entity"
 import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, ManyToOne } from "typeorm"
 
-enum ProductStatusEnum {
+export enum ProductStatusEnum {
   draft = "draft",
   published = "published"
 }
@@ -23,10 +23,13 @@ export class Product {
   @Column({ type: "float" })
   price: number
 
+  @Column({ type: "float", nullable: true })
+  discountPrice: number
+
   @Column({ type: "int" })
   stockCount: number
 
-  @Column({ type: "array" })
+  @Column("text", { array: true })
   images: string[]
 
   @Column({ type: "enum", enum: ProductStatusEnum, default: ProductStatusEnum.draft })

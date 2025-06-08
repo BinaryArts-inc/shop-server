@@ -51,7 +51,7 @@ export class CloudinaryStrategy implements IFileSystemService, IFileoptionsConfi
 
   async delete(publicId: string): Promise<void> {
     try {
-      await cloudinary.uploader.destroy(publicId, { resource_type: "auto" })
+      await cloudinary.uploader.destroy(publicId, { resource_type: "image" })
     } catch (error) {
       throw new ApiException(`Failed to delete file from Cloudinary: ${error.message}`, 500)
     }

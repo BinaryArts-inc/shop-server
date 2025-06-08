@@ -8,6 +8,7 @@ import { LocalFsStrategy } from "./strategies/local.strategy"
 import { S3Strategy } from "./strategies/aws.strategy"
 import { GoogleStorageStrategy } from "./strategies/google.strategy"
 import { DigitalOceanStrategy } from "./strategies/digitalocean.strategy"
+import { CloudinaryStrategy } from "./strategies/cloudinary.service"
 
 @Module({})
 export class FileSystemModule {
@@ -37,7 +38,7 @@ export class FileSystemModule {
         },
         {
           provide: FILESYSTEM_STRATEGY.cloudinary,
-          useClass: DigitalOceanStrategy
+          useClass: CloudinaryStrategy
         },
         FileSystemService
       ],
@@ -73,7 +74,7 @@ export class FileSystemModule {
         },
         {
           provide: FILESYSTEM_STRATEGY.cloudinary,
-          useClass: DigitalOceanStrategy
+          useClass: CloudinaryStrategy
         },
         FileSystemService
       ],

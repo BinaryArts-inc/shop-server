@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UseGuards } from "@nestjs/common"
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UseGuards, ParseUUIDPipe } from "@nestjs/common"
 import { BankService } from "./bank.service"
 import { bankSchema, CreateBankDto } from "./dto/create-bank.dto"
 import { UpdateBankDto } from "./dto/update-bank.dto"
@@ -10,6 +10,7 @@ import { Short_Time } from "../auth/decorators/short-time.decorator"
 import { NotFoundException } from "@/exceptions/notfound.exception"
 import { UserService } from "../user/user.service"
 import { ConflictException } from "@/exceptions/conflict.exception"
+import { ProductInterceptor } from "../products/interceptors/product.interceptor"
 
 @Controller("bank")
 export class BankController {
@@ -37,7 +38,8 @@ export class BankController {
   }
 
   @Get(":id")
-  findOne(@Param("id") id: string) {
+  @UseInterceptors(ProductInterceptor)
+  findOne(@Param("id", new ParseUUIDPipe()) id: string) {
     return this.bankService.findOne({ id: id })
   }
 
