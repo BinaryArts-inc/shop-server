@@ -42,6 +42,5 @@ export default class Business {
   user: User
 
   @OneToOne(() => Store, (store) => store.business)
-  @JoinColumn()
   store: Store
 }

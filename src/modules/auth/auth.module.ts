@@ -7,9 +7,10 @@ import { PasswordStrategy } from "./strategy/password.strategy"
 import { Otp } from "./entities/otp.entity"
 import { TypeOrmModule } from "@nestjs/typeorm"
 import { JwtService } from "@nestjs/jwt"
+import { StoreModule } from "../store/store.module"
 
 @Module({
-  imports: [UserModule, TypeOrmModule.forFeature([Otp])],
+  imports: [UserModule, StoreModule, TypeOrmModule.forFeature([Otp])],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy, PasswordStrategy, JwtService]
 })

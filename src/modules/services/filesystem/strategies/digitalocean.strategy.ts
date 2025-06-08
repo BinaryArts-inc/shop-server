@@ -13,6 +13,8 @@ export class DigitalOceanStrategy implements IFileSystemService, IFileoptionsCon
   private cdnEndPoint: string
 
   async upload(file: FileUploadDto): Promise<string> {
+    console.log("i got here", this.bucket, file)
+
     if (!file.filePath && !file.buffer) {
       throw new ApiException("valid file required", 500)
     }
@@ -21,20 +23,21 @@ export class DigitalOceanStrategy implements IFileSystemService, IFileoptionsCon
       throw new ApiException(`File does not exist at path: ${file.filePath}`, 500)
     }
 
-    const key = `tsa-2.0/${file.destination}`
-
     try {
       await this.clients.send(
         new PutObjectCommand({
           Bucket: this.bucket,
-          Key: key,
+          Key: file.destination,
           Body: file.buffer || fs.createReadStream(file.filePath),
           ContentType: file.mimetype,
           ACL: "public-read" as ObjectCannedACL
         })
       )
-      return `${this.endpoint}/${this.bucket}/${key}`
+
+      return `${this.endpoint}/${this.bucket}/${file.destination}`
     } catch (error) {
+      console.log("error", error)
+
       if (error.name === `NoSuchBucket`) {
         throw new ApiException(`No bucket`, 500)
       }

@@ -3,7 +3,6 @@ import { BankService } from "./bank.service"
 import { bankSchema, CreateBankDto } from "./dto/create-bank.dto"
 import { UpdateBankDto } from "./dto/update-bank.dto"
 import { JoiValidationPipe } from "@/validations/joi.validation"
-import { UserId } from "../user/decorator/user.decorator"
 import { BankInterceptor } from "./interceptors/bank.interceptor"
 import JwtShortTimeGuard from "../auth/guard/jwt-short-time.guard"
 import { ShortTime } from "../auth/decorators/short-time.decorator"
@@ -11,6 +10,7 @@ import { NotFoundException } from "@/exceptions/notfound.exception"
 import { UserService } from "../user/user.service"
 import { ConflictException } from "@/exceptions/conflict.exception"
 import { ProductInterceptor } from "../products/interceptors/product.interceptor"
+import { User } from "../user/decorator/user.decorator"
 
 @Controller("bank")
 export class BankController {
@@ -23,7 +23,7 @@ export class BankController {
   @Post()
   @UseGuards(JwtShortTimeGuard)
   @UseInterceptors(BankInterceptor)
-  async create(@Body(new JoiValidationPipe(bankSchema)) createBankDto: CreateBankDto, @UserId() userId: string) {
+  async create(@Body(new JoiValidationPipe(bankSchema)) createBankDto: CreateBankDto, @User("id") userId: string) {
     const user = await this.userService.findOne({ id: userId })
     if (!user) throw new NotFoundException("User not found")
 

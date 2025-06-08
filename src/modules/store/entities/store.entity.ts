@@ -1,6 +1,6 @@
 import { Product } from "@/modules/products/entities/product.entity"
 import Business from "@/modules/user/entity/business.entity"
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToOne, OneToMany } from "typeorm"
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToOne, OneToMany, JoinColumn } from "typeorm"
 
 @Entity()
 export class Store {
@@ -21,7 +21,8 @@ export class Store {
   // Currently, we store the category name as provided by the frontend.
   category: string
 
-  @OneToOne(() => Business, (business) => business.store, { nullable: true, onDelete: "SET NULL" })
+  @OneToOne(() => Business, (business) => business.store)
+  @JoinColumn()
   business: Business
 
   @OneToMany(() => Product, (product) => product.store)
