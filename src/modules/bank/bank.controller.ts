@@ -6,7 +6,7 @@ import { JoiValidationPipe } from "@/validations/joi.validation"
 import { UserId } from "../user/decorator/user.decorator"
 import { BankInterceptor } from "./interceptors/bank.interceptor"
 import JwtShortTimeGuard from "../auth/guard/jwt-short-time.guard"
-import { Short_Time } from "../auth/decorators/short-time.decorator"
+import { ShortTime } from "../auth/decorators/short-time.decorator"
 import { NotFoundException } from "@/exceptions/notfound.exception"
 import { UserService } from "../user/user.service"
 import { ConflictException } from "@/exceptions/conflict.exception"
@@ -19,7 +19,7 @@ export class BankController {
     private userService: UserService
   ) {}
 
-  @Short_Time()
+  @ShortTime()
   @Post()
   @UseGuards(JwtShortTimeGuard)
   @UseInterceptors(BankInterceptor)

@@ -14,7 +14,7 @@ import { UpdateUserDto } from "./dto/updateUserDto"
 export class UserService implements IService<User> {
   constructor(
     @InjectRepository(User)
-    private UserRepository: Repository<User>,
+    private userRepository: Repository<User>,
     @InjectRepository(Business)
     private businessRepository: Repository<Business>
   ) {}
@@ -24,7 +24,7 @@ export class UserService implements IService<User> {
 
     if (exist) throw new ConflictException("User exists")
 
-    const repo = manager ? manager.getRepository<User>(User) : this.UserRepository
+    const repo = manager ? manager.getRepository<User>(User) : this.userRepository
 
     const createUser = repo.create({ ...data })
     return await repo.save(createUser)
@@ -37,21 +37,21 @@ export class UserService implements IService<User> {
   }
 
   findById(id: string): Promise<User> {
-    return this.UserRepository.findOne({ where: { id: id } })
+    return this.userRepository.findOne({ where: { id: id } })
   }
 
   async findOne(filter: FindOptionsWhere<User>): Promise<User> {
-    const user = await this.UserRepository.findOne({ where: filter, relations: ["business", "business.store"] })
+    const user = await this.userRepository.findOne({ where: filter, relations: ["business", "business.store"] })
     if (!user) throw new BadReqException("User not found")
     return user
   }
 
   exists(filter: FindOptionsWhere<User>): Promise<boolean> {
-    return this.UserRepository.exists({ where: filter })
+    return this.userRepository.exists({ where: filter })
   }
 
   async update(entity: User, data: UpdateUserDto, manager?: EntityManager): Promise<User> {
-    const repo = manager ? manager.getRepository<User>(User) : this.UserRepository
+    const repo = manager ? manager.getRepository<User>(User) : this.userRepository
     await repo.update({ id: entity.id }, { ...data })
     const updatedUser = await repo.findOne({ where: { id: entity.id } })
     if (!updatedUser) throw new NotFoundException("User not found after update")

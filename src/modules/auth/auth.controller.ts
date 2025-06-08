@@ -7,7 +7,7 @@ import { AuthDto, registerSchema, ResendOtpDto, resendOtpSchema, VerifyEmailDto,
 import JwtShortTimeGuard from "./guard/jwt-short-time.guard"
 import { PasswordAuthGuard } from "./guard/password-auth.guard"
 import { LoginValidationGuard } from "./guard/login-validation.guard"
-import { Short_Time } from "./decorators/short-time.decorator"
+import { ShortTime } from "./decorators/short-time.decorator"
 import { AuthInterceptor } from "./interceptors/auth.interceptor"
 import { HelpersService } from "../services/utils/helpers/helpers.service"
 import { MailService } from "../services/mail/mail.service"
@@ -51,32 +51,29 @@ export class AuthController {
     })
   }
 
+  @ShortTime()
+  @Post("/verifyemail")
+  @HttpCode(200)
+  @UseGuards(JwtShortTimeGuard)
+  async verifyEmail(@Req() req: Request, @Body(new JoiValidationPipe(verifyEmailSchema)) verifyEmailDto: VerifyEmailDto) {
+    const isVerified = await this.authService.verifyCode({ email: req.user.email, code: verifyEmailDto.code })
+    await this.userService.update(req.user, { isEmailVerified: isVerified })
+
+    const shortTimeToken = await this.helperService.generateToken(
+      { email: req.user.email, id: req.user.id },
+      this.configService.get<IAuth>("auth").shortTimeJwtSecret,
+      "1h"
+    )
+
+    return { token: shortTimeToken }
+  }
+
   @Post("/login/password")
   @HttpCode(200)
   @UseInterceptors(AuthInterceptor)
   @UseGuards(LoginValidationGuard, PasswordAuthGuard)
   async login(@Req() req: Request) {
     return await this.authService.login({ email: req.user.email, id: req.user.id }, req.user)
-  }
-
-  @Short_Time()
-  @Post("/verifyemail")
-  @HttpCode(200)
-  @UseGuards(JwtShortTimeGuard)
-  async verifyEmail(@Req() req: Request, @Body(new JoiValidationPipe(verifyEmailSchema)) verifyEmailDto: VerifyEmailDto) {
-    const payload = req.payload
-
-    const user = await this.userService.findById(payload.id)
-    const isVerified = await this.authService.verifyCode({ email: payload.email, code: verifyEmailDto.code })
-    await this.userService.update(user, { isEmailVerified: isVerified })
-
-    const shortTimeToken = await this.helperService.generateToken(
-      { email: payload.email, id: user.id },
-      this.configService.get<IAuth>("auth").shortTimeJwtSecret,
-      "1h"
-    )
-
-    return { token: shortTimeToken }
   }
 
   @Patch("/resendotp")

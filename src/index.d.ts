@@ -4,14 +4,15 @@ import User from "./modules/user/entity/user.entity"
 declare module "Express" {
   interface Request {
     user: User
-    payload: {
-      email: string
-      id: string
-    }
   }
 }
 
 declare global {
+  interface JwtPayload {
+    id: string
+    email: string
+  }
+
   interface IService<T> {
     create(data: unknown, manager?: EntityManager): Promise<T>
     find(data: unknown): Promise<[T[], number]>

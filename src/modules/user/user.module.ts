@@ -5,14 +5,12 @@ import { TypeOrmModule } from "@nestjs/typeorm"
 import User from "./entity/user.entity"
 import Business from "./entity/business.entity"
 import { ConfigModule } from "@nestjs/config"
-import { JwtModule } from "@nestjs/jwt"
-import { jwtConfig } from "@/config/jwt.config"
-import { ServicesModule } from "../services/services.module"
+import { JwtService } from "@nestjs/jwt"
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, Business]), ServicesModule, ConfigModule, JwtModule.registerAsync(jwtConfig)],
+  imports: [TypeOrmModule.forFeature([User, Business]), ConfigModule],
   controllers: [UserController],
-  providers: [UserService],
+  providers: [UserService, JwtService],
   exports: [UserService]
 })
 export class UserModule {}

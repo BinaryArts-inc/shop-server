@@ -6,12 +6,19 @@ import { mailConfigAsync } from "@/config/mail.config"
 import { PaginationService } from "./pagination/pagination.service"
 import { FileSystemModule } from "./filesystem/filesystem.module"
 import { fileConfigAsync } from "@/config/filesystems.config"
-import { SharedModule } from "./sharedModule/sharedModule"
+import { JwtModule } from "@nestjs/jwt"
+import { jwtConfig } from "@/config/jwt.config"
 
 @Global()
 @Module({
-  imports: [PaginationModule, UtilsModule, MailModule.registerAsync(mailConfigAsync), FileSystemModule.registerAsync(fileConfigAsync), SharedModule],
+  imports: [
+    PaginationModule,
+    UtilsModule,
+    MailModule.registerAsync(mailConfigAsync),
+    FileSystemModule.registerAsync(fileConfigAsync),
+    JwtModule.registerAsync(jwtConfig)
+  ],
   providers: [PaginationService],
-  exports: [MailModule, PaginationService, UtilsModule, FileSystemModule, SharedModule]
+  exports: [MailModule, PaginationService, UtilsModule, FileSystemModule]
 })
 export class ServicesModule {}

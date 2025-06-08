@@ -9,7 +9,7 @@ import JwtShortTimeGuard from "../auth/guard/jwt-short-time.guard"
 import { FileSystemService } from "../services/filesystem/filesystem.service"
 import { JoiValidationPipe } from "@/validations/joi.validation"
 import { UserId } from "../user/decorator/user.decorator"
-import { Short_Time } from "../auth/decorators/short-time.decorator"
+import { ShortTime } from "../auth/decorators/short-time.decorator"
 import { UserService } from "../user/user.service"
 import { NotFoundException } from "@/exceptions/notfound.exception"
 import { ConflictException } from "@/exceptions/conflict.exception"
@@ -27,7 +27,7 @@ export class StoreController {
     private configService: ConfigService
   ) {}
 
-  @Short_Time()
+  @ShortTime()
   @Post()
   @UseGuards(JwtShortTimeGuard)
   @UseInterceptors(FileInterceptor("image", { ...diskUpload }))

@@ -10,8 +10,8 @@ import { UserService } from "@/modules/user/user.service"
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, "jwt") {
   constructor(
-    private configService: ConfigService,
-    private UserService: UserService
+    private readonly configService: ConfigService,
+    private userService: UserService
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -21,7 +21,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, "jwt") {
   }
 
   async validate(payload: any, req: Request) {
-    const user = await this.UserService.findById(payload.sub)
+    const user = await this.userService.findById(payload.sub)
 
     if (!user) {
       throw new UnAuthorizedException()

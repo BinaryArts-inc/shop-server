@@ -22,8 +22,8 @@ import { ProductsModule } from "./modules/products/products.module"
 
 @Module({
   imports: [
-    AuthModule,
     UserModule,
+    AuthModule,
     ConfigModule.forRoot({
       isGlobal: true,
       load: [appConfig, authConfig, mailConfig, filesystemsConfig]
