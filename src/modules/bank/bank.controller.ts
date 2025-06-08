@@ -1,10 +1,11 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, ParseUUIDPipe } from "@nestjs/common"
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, ParseUUIDPipe, Req } from "@nestjs/common"
 import { BankService } from "./bank.service"
 import { bankSchema, CreateBankDto } from "./dto/create-bank.dto"
 import { UpdateBankDto } from "./dto/update-bank.dto"
 import { JoiValidationPipe } from "@/validations/joi.validation"
 import { BankInterceptor } from "./interceptors/bank.interceptor"
 import { ConflictException } from "@/exceptions/conflict.exception"
+import { Request } from "express"
 
 @Controller("bank")
 export class BankController {
@@ -12,10 +13,9 @@ export class BankController {
 
   @Post()
   @UseInterceptors(BankInterceptor)
-  async create(@Body(new JoiValidationPipe(bankSchema)) createBankDto: CreateBankDto) {
+  async create(@Body(new JoiValidationPipe(bankSchema)) createBankDto: CreateBankDto, @Req() req: Request) {
     if (await this.bankService.exist({ accountNumber: createBankDto.accountNumber })) throw new ConflictException("Bank credentials already exist")
-
-    return await this.bankService.create(createBankDto)
+    return await this.bankService.create({ ...createBankDto, user: req.user })
   }
 
   @Get()

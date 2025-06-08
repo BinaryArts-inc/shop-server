@@ -8,7 +8,7 @@ export interface IAuthResponse {
     lastName: string
     email: string
     role: string
-    fullName: () => void
+    fullName: string
     createdAt: Date
     updatedAt: Date
   }

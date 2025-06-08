@@ -9,7 +9,7 @@ export abstract class AuthResponseMapper implements IInterceptor {
         lastName: data.user.lastName,
         role: data.user.role,
         email: data.user.email,
-        fullName: data.user.fullName,
+        fullName: data.user.getFullName(),
         createdAt: data.user.createdAt,
         updatedAt: data.user.updatedAt
       },
