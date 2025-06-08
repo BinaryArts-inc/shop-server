@@ -38,7 +38,9 @@ export default class Business {
   updatedAt: Date
 
   @OneToOne(() => User, (user) => user.business)
+  @JoinColumn()
   user: User
+
   @OneToOne(() => Store, (store) => store.business)
   @JoinColumn()
   store: Store

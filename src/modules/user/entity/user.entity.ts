@@ -1,15 +1,4 @@
-import {
-  BeforeInsert,
-  BeforeUpdate,
-  Column,
-  CreateDateColumn,
-  Entity,
-  JoinColumn,
-  OneToMany,
-  OneToOne,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn
-} from "typeorm"
+import { BeforeInsert, BeforeUpdate, Column, CreateDateColumn, Entity, OneToMany, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm"
 import * as bcrypt from "bcryptjs"
 import Business from "./business.entity"
 import { Bank } from "@/modules/bank/entities/bank.entity"
@@ -51,7 +40,6 @@ export default class User {
   updatedAt: Date
 
   @OneToOne(() => Business, (business) => business.user)
-  @JoinColumn()
   business: Business
 
   @OneToMany(() => Bank, (bank) => bank.user)
