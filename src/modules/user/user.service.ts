@@ -1,5 +1,4 @@
 import { Injectable } from "@nestjs/common"
-import User from "./entity/user.entity"
 import { InjectRepository } from "@nestjs/typeorm"
 import { EntityManager, FindOptionsWhere, Repository } from "typeorm"
 import { CreateUserDto } from "./dto/create-user-dto"
@@ -9,6 +8,7 @@ import Business from "./entity/business.entity"
 import { NotFoundException } from "@/exceptions/notfound.exception"
 import { UpdateUserDto } from "./dto/update-user-dto"
 import { CreateBusinessDto } from "./dto/create-business-dto"
+import { User } from "./entity/user.entity"
 
 @Injectable()
 export class UserService implements IService<User> {

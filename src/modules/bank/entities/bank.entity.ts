@@ -1,4 +1,4 @@
-import User from "@/modules/user/entity/user.entity"
+import { User } from "@/modules/user/entity/user.entity"
 import { Entity, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, Column, ManyToOne } from "typeorm"
 
 @Entity()

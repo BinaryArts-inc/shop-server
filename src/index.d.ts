@@ -1,5 +1,5 @@
 import { EntityManager, FindOptionsWhere } from "typeorm"
-import User from "./modules/user/entity/user.entity"
+import { User } from "./modules/user/entity/user.entity"
 
 declare module "Express" {
   interface Request {
