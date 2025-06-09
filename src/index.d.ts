@@ -1,12 +1,11 @@
 import { EntityManager, FindOptionsWhere } from "typeorm"
 
-declare module "Express" {
-  interface Request {
-    user: User
-  }
-}
-
 declare global {
+  namespace Express {
+    interface Request {
+      user: User
+    }
+  }
   interface JwtPayload {
     id: string
     email: string
