@@ -129,16 +129,6 @@ export class AuthController {
     return { token }
   }
 
-  @Post("/login/password")
-  @HttpCode(200)
-  @UseInterceptors(AuthInterceptor)
-  @UseGuards(LoginValidationGuard, PasswordAuthGuard)
-  async login(@Req() req: Request) {
-    const tokens = await this.authService.login({ email: req.user.email, id: req.user.id })
-
-    return { user: req.user, tokens }
-  }
-
   @Patch("/resendotp")
   async resendOtp(@Body(new JoiValidationPipe(resendOtpSchema)) { email }: ResendOtpDto) {
     const user = await this.userService.findOne({ email })
@@ -160,5 +150,25 @@ export class AuthController {
     )
 
     return { token: shortTimeToken }
+  }
+
+  @Post("/login/password")
+  @HttpCode(200)
+  @UseInterceptors(AuthInterceptor)
+  @UseGuards(LoginValidationGuard, PasswordAuthGuard)
+  async passwordLogin(@Req() req: Request) {
+    const tokens = await this.authService.login({ email: req.user.email, id: req.user.id })
+
+    return { user: req.user, tokens }
+  }
+
+  @Post("/login/google")
+  @HttpCode(200)
+  @UseInterceptors(AuthInterceptor)
+  @UseGuards(LoginValidationGuard, PasswordAuthGuard)
+  async googleLogin(@Req() req: Request) {
+    const tokens = await this.authService.login({ email: req.user.email, id: req.user.id })
+
+    return { user: req.user, tokens }
   }
 }
