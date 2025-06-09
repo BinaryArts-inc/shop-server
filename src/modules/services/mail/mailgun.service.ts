@@ -12,7 +12,9 @@ export class MailgunMailService implements IMailService, IMailOptionsConfigurato
   private mailgun: any
   //   private mailgun: Mailgun.MailgunClientOptions
 
-  async send(_message: IMailMessage) {
+  async send(message: IMailMessage) {
+    console.log("message", message)
+
     throw new Error("Method not implemented.")
   }
 
