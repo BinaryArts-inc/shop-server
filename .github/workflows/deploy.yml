@@ -1,0 +1,173 @@
+name: Skicom shop CI/CD
+
+on:
+   pull_request:
+      branches: ['main', 'staging', 'development']
+   push:
+      branches: ['main', 'staging', 'development']
+
+jobs:
+   lint:
+      if: ${{ github.event_name == 'push' }}
+      name: Code style and Lint
+      runs-on: ubuntu-latest
+      strategy:
+         fail-fast: true
+         matrix:
+            node-version: [20.x]
+
+      steps:
+         - name: Checkout code
+           uses: actions/checkout@v4
+
+         - name: Setup - Use Node.js ${{ matrix.node-version }}
+           uses: actions/setup-node@v4
+           with:
+              node-version: ${{ matrix.node-version }}
+              cache: 'npm'
+
+         - name: Install dependencies 🚀
+           run: npm install
+
+         - name: Format codebase ☕
+           run: npm run format
+
+         - name: Commit linted files
+           uses: stefanzweifel/git-auto-commit-action@v5
+           with:
+              commit_message: 'Fixes coding style'
+
+         - name: Test Lint 💻
+           run: npm run lint
+
+   deploy-dev:
+      if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/development' }}
+      name: Build and Deploy Dev
+      needs: lint
+      runs-on: [skicom-shop-server]
+
+      strategy:
+         matrix:
+            node-version: [20.x]
+
+      steps:
+         - name: Checkout code ☕
+           uses: actions/checkout@v4
+
+         - name: Use Node.js ${{ matrix.node-version }}
+           uses: actions/setup-node@v4
+           with:
+              node-version: ${{ matrix.node-version }}
+              cache: 'npm'
+
+         - name: Set Deployment Path
+           run: echo "DEPLOY_PATH=/var/www/shop/server/dev" >> $GITHUB_ENV
+
+         - name: Move Repository to Deploy Path
+           run: |
+              mkdir -p $DEPLOY_PATH
+              rsync -a --delete "${{ github.workspace }}/" "$DEPLOY_PATH"
+
+         - name: Create .env file 🌮
+           run: echo "${{ secrets.ENV_DEV }}" > $DEPLOY_PATH/.env
+
+         - name: Install dependencies 🚀
+           run: npm install --prefix $DEPLOY_PATH
+
+         - name: Drop All Tables ❌
+           run: npm run migration:drop --prefix $DEPLOY_PATH
+
+         - name: Run Migrations 🔄
+           run: npm run migration:migrate --prefix $DEPLOY_PATH
+
+         - name: Build Application 💻
+           run: npm run build --prefix $DEPLOY_PATH
+
+         - name: Restart App 💻
+           run: pm2 restart skicom-shop-server-dev
+
+   deploy-staging:
+      if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/staging' }}
+      name: Build and Deploy Staging
+      needs: lint
+      runs-on: [skicom-shop-server]
+
+      strategy:
+         matrix:
+            node-version: [20.x]
+
+      steps:
+         - name: Checkout code ☕
+           uses: actions/checkout@v4
+
+         - name: Use Node.js ${{ matrix.node-version }}
+           uses: actions/setup-node@v4
+           with:
+              node-version: ${{ matrix.node-version }}
+              cache: 'npm'
+
+         - name: Set Deployment Path
+           run: echo "DEPLOY_PATH=/var/www/shop/server/staging" >> $GITHUB_ENV
+
+         - name: Move Repository to Deploy Path
+           run: |
+            mkdir -p $DEPLOY_PATH
+            rsync -a --delete "${{ github.workspace }}/" "$DEPLOY_PATH"
+
+         - name: Create .env file 🌮
+           run: echo "${{ secrets.ENV_STAGING }}" > $DEPLOY_PATH/.env
+
+         - name: Install dependencies 🚀
+           run: npm install --prefix $DEPLOY_PATH
+
+         - name: Run Migrations 🔄
+           run: npm run migration:migrate --prefix $DEPLOY_PATH
+
+         - name: Build Application 💻
+           run: npm run build --prefix $DEPLOY_PATH
+
+         - name: Restart App 💻
+           run: pm2 restart skicom-shop-server-staging
+
+   deploy-prod:
+      if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+      name: Build and Deploy Production
+      needs: lint
+      runs-on: [skicom-shop-server]
+
+      strategy:
+         matrix:
+            node-version: [20.x]
+
+      steps:
+         - name: Checkout code ☕
+           uses: actions/checkout@v4
+
+         - name: Use Node.js ${{ matrix.node-version }}
+           uses: actions/setup-node@v4
+           with:
+              node-version: ${{ matrix.node-version }}
+              cache: 'npm'
+
+         - name: Set Deployment Path
+           run: echo "DEPLOY_PATH=/var/www/shop/server/prod" >> $GITHUB_ENV
+
+         - name: Move Repository to Deploy Path
+           run: |
+            mkdir -p $DEPLOY_PATH
+            rsync -a --delete "${{ github.workspace }}/" "$DEPLOY_PATH"
+
+         - name: Create .env file 🌮
+           run: echo "${{ secrets.ENV_PROD }}" > $DEPLOY_PATH/.env
+
+         - name: Install dependencies 🚀
+           run: npm install --prefix $DEPLOY_PATH
+
+         - name: Run Migrations 🔄
+           run: npm run migration:migrate --prefix $DEPLOY_PATH
+
+         - name: Build Application 💻
+           run: npm run build --prefix $DEPLOY_PATH
+
+         - name: Restart App 💻
+           run: pm2 restart skicom-shop-server-prod
