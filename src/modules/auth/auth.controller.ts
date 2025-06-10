@@ -1,7 +1,7 @@
 import { Request } from "express"
 import { AuthService } from "./auth.service"
 import { Public } from "./decorators/public.decorator"
-import { Controller, Post, Body, HttpCode, Patch, UseGuards, Req, UseInterceptors, ConflictException, UploadedFile } from "@nestjs/common"
+import { Controller, Post, Body, HttpCode, Patch, UseGuards, Req, UseInterceptors, ConflictException, UploadedFile, Get } from "@nestjs/common"
 import { JoiValidationPipe } from "@/validations/joi.validation"
 import { AuthDto, registerSchema, ResendOtpDto, resendOtpSchema, VerifyEmailDto, verifyEmailSchema } from "./dto/auth.dto"
 import JwtShortTimeGuard from "./guard/jwt-short-time.guard"
@@ -24,6 +24,7 @@ import { User } from "../user/decorator/user.decorator"
 import { FileUploadDto } from "../services/filesystem/interfaces/filesystem.interface"
 import { FileSystemService } from "../services/filesystem/filesystem.service"
 import { StoreService } from "../store/store.service"
+import { GoogleOAuthGuard } from "./guard/google-oauth.guard"
 
 @Public()
 @Controller("auth")
@@ -162,11 +163,15 @@ export class AuthController {
     return { user: req.user, tokens }
   }
 
-  @Post("/login/google")
+  @Get("/oauth/google/redirect")
+  @UseGuards(GoogleOAuthGuard)
+  async googleLogin() {}
+
+  @Get("oauth/google/callback")
   @HttpCode(200)
   @UseInterceptors(AuthInterceptor)
-  @UseGuards(LoginValidationGuard, PasswordAuthGuard)
-  async googleLogin(@Req() req: Request) {
+  @UseGuards(GoogleOAuthGuard)
+  async googleAuthRedirect(@Req() req: Request) {
     const tokens = await this.authService.login({ email: req.user.email, id: req.user.id })
 
     return { user: req.user, tokens }

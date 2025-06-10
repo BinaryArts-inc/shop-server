@@ -1,4 +1,5 @@
 import { UnAuthorizedException } from "@/exceptions/unAuthorized.exception"
+import { User } from "@/modules/user/entity/user.entity"
 import { ExecutionContext, Injectable } from "@nestjs/common"
 import { Reflector } from "@nestjs/core"
 import { AuthGuard } from "@nestjs/passport"
@@ -15,7 +16,7 @@ export class JwtGuard extends AuthGuard("jwt") {
     return super.canActivate(context)
   }
 
-  handleRequest(err, user, info) {
+  handleRequest<T extends User>(err: any, user: T, info: any) {
     if (err || !user) {
       throw err || new UnAuthorizedException(info?.message || "Unauthorized")
     }

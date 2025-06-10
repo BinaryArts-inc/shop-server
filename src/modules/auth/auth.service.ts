@@ -44,17 +44,12 @@ export class AuthService {
     return true
   }
 
-  // async verifyEmail(code: number) {
-  //   const otp = await this.userService.findUserOtp({ code })
-  //   if (!otp) throw new NotFoundException("OTP not found")
+  async validateEmail(email: string) {
+    const user = await this.userService.findOne({ email })
+    if (!user) throw new NotFoundException("user not found")
 
-  //   const user = await this.userService.findOne({ email: otp.email })
-  //   const updateUser = await this.userService.update(user, { isEmailVerified: true })
-  //   console.log(updateUser)
-  //   const payload = { email: user.email, id: user.id }
-  //   const token = await this.helperService.generateToken(payload, this.configService.get<IAuth>("auth").shortTimeJwtSecret, "1h")
-  //   return { token }
-  // }
+    return user
+  }
 
   async validateUser(loginDto: LoginDto) {
     const user = await this.userService.findOne({ email: loginDto.email })

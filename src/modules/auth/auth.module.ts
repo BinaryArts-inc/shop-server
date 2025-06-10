@@ -8,10 +8,11 @@ import { Otp } from "./entities/otp.entity"
 import { TypeOrmModule } from "@nestjs/typeorm"
 import { JwtService } from "@nestjs/jwt"
 import { StoreModule } from "../store/store.module"
+import { GoogleStrategy } from "./strategies/google.strategy"
 
 @Module({
   imports: [UserModule, StoreModule, TypeOrmModule.forFeature([Otp])],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, PasswordStrategy, JwtService]
+  providers: [AuthService, JwtStrategy, PasswordStrategy, GoogleStrategy, JwtService]
 })
 export class AuthModule {}
