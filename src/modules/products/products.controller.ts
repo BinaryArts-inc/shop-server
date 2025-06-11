@@ -1,9 +1,9 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UploadedFiles, UseInterceptors, Req, ParseUUIDPipe } from "@nestjs/common"
+import { Controller, Get, Post, Body, Patch, Param, Delete, UploadedFiles, UseInterceptors, Req, ParseUUIDPipe, Query } from "@nestjs/common"
 import { ProductsService } from "./products.service"
 import { CreateProductDto, createProductSchema } from "./dto/create-product.dto"
 import { UpdateProductDto } from "./dto/update-product.dto"
 import { FilesInterceptor } from "@nestjs/platform-express"
-import { diskUpload } from "@/config/multer.config"
+import { diskUpload, memoryUpload } from "@/config/multer.config"
 import { JoiValidationPipe } from "@/validations/joi.validation"
 import { Request } from "express"
 import { StoreService } from "../store/store.service"
@@ -16,6 +16,7 @@ import { ProductsInterceptor } from "./interceptors/products.interceptor"
 import { ProductInterceptor } from "./interceptors/product.interceptor"
 import { UnAuthorizedException } from "@/exceptions/unAuthorized.exception"
 import { RemoveImageDto, removeImageSchema } from "./dto/removeImageDto"
+import { IProductsQuery } from "./interfaces/query-filter.interface"
 @Controller("products")
 export class ProductsController {
   constructor(
@@ -26,7 +27,7 @@ export class ProductsController {
   ) {}
 
   @Post()
-  @UseInterceptors(FilesInterceptor("images", 5, { ...diskUpload }), ProductInterceptor)
+  @UseInterceptors(FilesInterceptor("images", 5, { ...memoryUpload }), ProductInterceptor)
   async create(
     @Body(new JoiValidationPipe(createProductSchema)) createProductDto: CreateProductDto,
     @UploadedFiles() filesUploaded: Array<CustomFile>,
@@ -45,7 +46,8 @@ export class ProductsController {
           buffer: image.buffer,
           filePath: image.path
         }
-        const url = await this.fileSystem.getFileSystem("cloudinary").upload(fileDto)
+
+        const url = await this.fileSystem.upload(fileDto)
         return url
       })
     )
@@ -58,8 +60,8 @@ export class ProductsController {
 
   @Get()
   @UseInterceptors(ProductsInterceptor)
-  async findAll() {
-    return await this.productsService.findAll()
+  async findAll(@Query() query: IProductsQuery) {
+    return await this.productsService.find(query)
   }
 
   @Get(":id")
@@ -102,7 +104,7 @@ export class ProductsController {
     // prepare to update product
     const data = this.dtoMapper.prepareUpdateProductDto(updateProduct, product, images)
 
-    return await this.productsService.update(id, data)
+    return await this.productsService.update(product, data)
   }
 
   @Patch("remove-images/:id")
@@ -128,7 +130,7 @@ export class ProductsController {
       ...product,
       images
     }
-    return await this.productsService.update(id, data)
+    return await this.productsService.update(product, data)
   }
 
   @Delete(":id")
@@ -142,6 +144,6 @@ export class ProductsController {
       })
     )
 
-    return await this.productsService.remove(id)
+    return await this.productsService.remove({ id })
   }
 }

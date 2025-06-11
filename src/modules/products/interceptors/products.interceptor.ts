@@ -6,6 +6,7 @@ import { PaginationService } from "@/modules/services/pagination/pagination.serv
 import { map, Observable } from "rxjs"
 import { PaginationParams } from "@/modules/services/pagination/interfaces/paginationParams.interface"
 import { IProductResponse } from "../interfaces/product-response-interface"
+import { BadReqException } from "@/exceptions/badRequest.exception"
 
 type PayloadType = [Product[], number]
 
@@ -17,7 +18,9 @@ export class ProductsInterceptor extends ProductResponseMapper implements NestIn
 
   intercept(context: ExecutionContext, next: CallHandler<PayloadType>): Observable<IProductsResponse> {
     const request = context.switchToHttp().getRequest()
-    const { page, limit } = request.query
+    const { page, limit, storeId } = request.query
+
+    if (!storeId) throw new BadReqException("store id required")
 
     return next.handle().pipe(map((data) => this.paginate(data, { page, limit })))
   }
