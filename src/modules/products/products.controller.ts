@@ -3,7 +3,7 @@ import { ProductsService } from "./products.service"
 import { CreateProductDto, createProductSchema } from "./dto/create-product.dto"
 import { UpdateProductDto } from "./dto/update-product.dto"
 import { FilesInterceptor } from "@nestjs/platform-express"
-import { diskUpload, memoryUpload } from "@/config/multer.config"
+import { diskUpload, memoryUpload, nameFilter } from "@/config/multer.config"
 import { JoiValidationPipe } from "@/validations/joi.validation"
 import { Request } from "express"
 import { StoreService } from "../store/store.service"
@@ -27,7 +27,7 @@ export class ProductsController {
   ) {}
 
   @Post()
-  @UseInterceptors(FilesInterceptor("images", 5, { ...memoryUpload }), ProductInterceptor)
+  @UseInterceptors(FilesInterceptor("images", 5, { ...memoryUpload, fileFilter: nameFilter }), ProductInterceptor)
   async create(
     @Body(new JoiValidationPipe(createProductSchema)) createProductDto: CreateProductDto,
     @UploadedFiles() filesUploaded: Array<CustomFile>,
@@ -41,7 +41,7 @@ export class ProductsController {
     const handleImageUploaded = await Promise.all(
       filesUploaded.map(async (image) => {
         const fileDto: FileUploadDto = {
-          destination: `images/${image.originalname}-storelogo.${image.extension}`,
+          destination: `images/logo/${image.originalname}${image.extension}`,
           mimetype: image.mimetype,
           buffer: image.buffer,
           filePath: image.path
@@ -135,12 +135,12 @@ export class ProductsController {
 
   @Delete(":id")
   async remove(@Param("id", ParseUUIDPipe) id: string) {
-    const product = await this.productsService.findOne({ id: id })
+    const product = await this.productsService.findById(id)
     if (!product) throw new NotFoundException("Product does not exist")
 
     await Promise.all(
       product.images.map(async (image) => {
-        await this.fileSystem.getFileSystem("cloudinary").delete(image)
+        await this.fileSystem.delete(image)
       })
     )
 

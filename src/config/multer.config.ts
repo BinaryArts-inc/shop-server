@@ -51,6 +51,18 @@ export function pdfFilter(_req: Request, file: CustomFile, callback: any) {
   callback(null, true)
 }
 
+export function nameFilter(_req: Request, file: CustomFile, callback: any) {
+  const ext = path.extname(file.originalname)
+
+  const name = file.originalname.replace(/[^a-zA-Z0-9]/g, "-").toLowerCase()
+
+  file.originalname = name
+
+  file.extension = ext
+
+  callback(null, true)
+}
+
 const myMemoryStorage = memoryStorage()
 
 const myDiskStorage = diskStorage({
