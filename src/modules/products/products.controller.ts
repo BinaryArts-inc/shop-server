@@ -3,7 +3,7 @@ import { ProductsService } from "./products.service"
 import { CreateProductDto, createProductSchema } from "./dto/create-product.dto"
 import { UpdateProductDto } from "./dto/update-product.dto"
 import { FilesInterceptor } from "@nestjs/platform-express"
-import { diskUpload, memoryUpload, nameFilter } from "@/config/multer.config"
+import { memoryUpload, nameFilter } from "@/config/multer.config"
 import { JoiValidationPipe } from "@/validations/joi.validation"
 import { Request } from "express"
 import { StoreService } from "../store/store.service"
@@ -71,7 +71,7 @@ export class ProductsController {
   }
 
   @Patch(":id")
-  @UseInterceptors(FilesInterceptor("images", 5, { ...diskUpload }), ProductInterceptor)
+  @UseInterceptors(FilesInterceptor("images", 5, { ...memoryUpload, fileFilter: nameFilter }), ProductInterceptor)
   async update(
     @Param("id", ParseUUIDPipe) id: string,
     @Body() updateProductDto: UpdateProductDto,
@@ -94,7 +94,7 @@ export class ProductsController {
 
     if (!ownsProduct) throw new UnAuthorizedException("You are not allowed to edit this product")
 
-    const images = await this.productsService.handleImageUploads(uploadedFiles, product.images)
+    const images = await this.productsService.handleImageUploads(uploadedFiles, product.images, updateProductDto.images)
 
     const updateProduct: UpdateProductDto = {
       ...updateProductDto,

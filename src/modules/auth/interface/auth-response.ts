@@ -12,14 +12,6 @@ export interface IAuthResponse {
     createdAt: Date
     updatedAt: Date
   }
-  store: {
-    id: string
-    name: string
-    description: string
-    logo: string
-    createdAt: Date
-    updatedAt: Date
-  }
   tokens: {
     accessToken: string
     refreshToken: string

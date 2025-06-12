@@ -13,14 +13,6 @@ export abstract class AuthResponseMapper implements IInterceptor {
         createdAt: data.user.createdAt,
         updatedAt: data.user.updatedAt
       },
-      store: {
-        id: data.user.business.store.id,
-        name: data.user.business.store.name,
-        logo: data.user.business.store.logo,
-        description: data.user.business.store.description,
-        createdAt: data.user.business.store.createdAt,
-        updatedAt: data.user.business.store.updateAt
-      },
       tokens: {
         accessToken: data.tokens.accessToken,
         refreshToken: data.tokens.refreshToken

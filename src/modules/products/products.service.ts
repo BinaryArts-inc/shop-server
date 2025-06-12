@@ -78,30 +78,48 @@ export class ProductsService implements IService<Product> {
     return remove.affected
   }
 
-  async handleImageUploads(uploadedFiles: Array<CustomFile>, existingImages: string[]): Promise<string[]> {
-    if (!uploadedFiles || uploadedFiles.length === 0) return existingImages
-
-    const maxImages = 5
-    const productLength = existingImages.length
-    if (productLength >= maxImages) {
-      throw new BadReqException("Remove an image first before adding new ones")
-    }
-    if (uploadedFiles.length > maxImages - productLength) {
-      throw new BadReqException("Image uploads exceed available space")
+  async handleImageUploads(uploadedFiles: Array<CustomFile>, existingImages: string[], imagesToBeReplaced: string[]): Promise<string[]> {
+    if (!Array.isArray(uploadedFiles) || uploadedFiles.length === 0) {
+      return [...existingImages]
     }
 
+    // Validate that the number of uploaded files matches the images to be replaced
+    if (uploadedFiles.length !== imagesToBeReplaced.length) {
+      throw new BadReqException("The number of uploaded files must match the number of images to be replaced")
+    }
+
+    // Check if images to be replaced exist in existing images
+    const indexesToReplace = imagesToBeReplaced.map((image) => existingImages.indexOf(image))
+    if (indexesToReplace.includes(-1)) {
+      throw new BadReqException("Some images to be replaced are not in the existing images")
+    }
+
+    // Clone existingImages to avoid mutating input
+    const updatedImages = [...existingImages]
+
+    // Upload new images
     const uploadedUrls = await Promise.all(
-      uploadedFiles.map(async (image) => {
-        const fileDto: FileUploadDto = {
-          destination: `images/${image.originalname}-storelogo.${image.extension}`,
-          mimetype: image.mimetype,
-          buffer: image.buffer,
-          filePath: image.path
+      uploadedFiles.map(async (image, index) => {
+        try {
+          const extension = image.mimetype.split("/")[1] || "jpg" // Fallback extension
+          const fileDto: FileUploadDto = {
+            destination: `images/${image.originalname}-storelogo-${index}.${extension}`,
+            mimetype: image.mimetype,
+            buffer: image.buffer,
+            filePath: image.path
+          }
+          return await this.fileSystem.upload(fileDto)
+        } catch (error) {
+          throw new BadReqException(`Failed to upload image ${image.originalname}: ${error.message}`)
         }
-        return this.fileSystem.getFileSystem("cloudinary").upload(fileDto)
       })
     )
 
-    return [...existingImages, ...uploadedUrls]
+    // Replace images at specified indexes
+    indexesToReplace.forEach((index, i) => {
+      updatedImages[index] = uploadedUrls[i]
+    })
+
+    return updatedImages
   }
 }
