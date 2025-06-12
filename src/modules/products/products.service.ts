@@ -83,6 +83,32 @@ export class ProductsService implements IService<Product> {
       return [...existingImages]
     }
 
+    if (imagesToBeReplaced.length === 0) {
+      const lengthOfExistingImages = existingImages.length // 1
+      const lengthOfImagesToBeUploaded = uploadedFiles.length // 4
+      const lengthOfTheNewImageArray = lengthOfExistingImages + lengthOfImagesToBeUploaded
+      if (lengthOfTheNewImageArray > 5) {
+        throw new BadReqException("Images will execeed the total of images to be uploaded")
+      }
+      const uploadedUrls = await Promise.all(
+        uploadedFiles.map(async (image, index) => {
+          try {
+            const extension = image.mimetype.split("/")[1] || "jpg" // Fallback extension
+            const fileDto: FileUploadDto = {
+              destination: `images/${image.originalname}-storelogo-${index}.${extension}`,
+              mimetype: image.mimetype,
+              buffer: image.buffer,
+              filePath: image.path
+            }
+            return await this.fileSystem.upload(fileDto)
+          } catch (error) {
+            throw new BadReqException(`Failed to upload image ${image.originalname}: ${error.message}`)
+          }
+        })
+      )
+      return [...existingImages, ...uploadedUrls]
+    }
+
     // Validate that the number of uploaded files matches the images to be replaced
     if (uploadedFiles.length !== imagesToBeReplaced.length) {
       throw new BadReqException("The number of uploaded files must match the number of images to be replaced")
@@ -119,6 +145,17 @@ export class ProductsService implements IService<Product> {
     indexesToReplace.forEach((index, i) => {
       updatedImages[index] = uploadedUrls[i]
     })
+
+    // Delete old images
+    await Promise.all(
+      imagesToBeReplaced.map(async (imageUrl) => {
+        try {
+          await this.fileSystem.delete(imageUrl)
+        } catch (error) {
+          throw new BadReqException(`Failed to delete image ${imageUrl}: ${error.message}`)
+        }
+      })
+    )
 
     return updatedImages
   }
