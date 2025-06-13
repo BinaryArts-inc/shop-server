@@ -15,7 +15,7 @@ import { TransformResponseInterceptor } from "./interceptors/response.intercepto
 import { ServicesModule } from "./modules/services/services.module"
 import { UtilsModule } from "./modules/services/utils/utils.module"
 import { StoreModule } from "./modules/store/store.module"
-import { BankModule } from "./modules/bank/bank.module"
+import { BankModule } from "./modules/banks/bank.module"
 import filesystemsConfig from "./config/filesystems.config"
 import { JwtGuard } from "./modules/auth/guard/jwt-auth.guard"
 import { ProductsModule } from "./modules/products/products.module"
