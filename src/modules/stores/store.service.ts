@@ -4,8 +4,8 @@ import { UpdateStoreDto } from "./dto/update-store.dto"
 import { InjectRepository } from "@nestjs/typeorm"
 import { Store } from "./entities/store.entity"
 import { FindOptionsWhere, Repository } from "typeorm"
-import { UserService } from "../user/user.service"
-import Business from "../user/entity/business.entity"
+import { UserService } from "../users/user.service"
+import Business from "../users/entity/business.entity"
 
 @Injectable()
 export class StoreService {

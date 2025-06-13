@@ -3,7 +3,7 @@ import { BankService } from "./bank.service"
 import { BankController } from "./bank.controller"
 import { TypeOrmModule } from "@nestjs/typeorm"
 import { Bank } from "./entities/bank.entity"
-import { UserModule } from "../user/user.module"
+import { UserModule } from "../users/user.module"
 import { JwtModule } from "@nestjs/jwt"
 import { jwtConfig } from "@/config/jwt.config"
 

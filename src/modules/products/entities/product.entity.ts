@@ -1,5 +1,5 @@
-import { Store } from "@/modules/store/entities/store.entity"
-import { User } from "@/modules/user/entity/user.entity"
+import { Store } from "@/modules/stores/entities/store.entity"
+import { User } from "@/modules/users/entity/user.entity"
 import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, ManyToOne } from "typeorm"
 
 export enum ProductStatusEnum {

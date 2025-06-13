@@ -1,6 +1,6 @@
 import { BadReqException } from "@/exceptions/badRequest.exception"
 import { UnAuthorizedException } from "@/exceptions/unAuthorized.exception"
-import { User } from "@/modules/user/entity/user.entity"
+import { User } from "@/modules/users/entity/user.entity"
 import { Injectable } from "@nestjs/common"
 import { AuthGuard } from "@nestjs/passport"
 import { TokenError } from "passport-oauth2"

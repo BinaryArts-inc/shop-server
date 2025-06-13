@@ -4,7 +4,7 @@ import { ConfigService } from "@nestjs/config"
 import { PassportStrategy } from "@nestjs/passport"
 
 import { AuthService } from "../auth.service"
-import { User } from "@/modules/user/entity/user.entity"
+import { User } from "@/modules/users/entity/user.entity"
 import { Strategy } from "passport-google-oauth2"
 
 @Injectable()

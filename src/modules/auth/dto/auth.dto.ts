@@ -1,5 +1,5 @@
 import * as joi from "joi"
-import { UserRoleEnum } from "@/modules/user/entity/user.entity"
+import { UserRoleEnum } from "@/modules/users/entity/user.entity"
 
 export class AuthDto {
   firstName: string
