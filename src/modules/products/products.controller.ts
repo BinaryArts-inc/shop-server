@@ -1,4 +1,18 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UploadedFiles, UseInterceptors, Req, ParseUUIDPipe, Query } from "@nestjs/common"
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UploadedFiles,
+  UseInterceptors,
+  Req,
+  ParseUUIDPipe,
+  Query,
+  UseGuards
+} from "@nestjs/common"
 import { ProductsService } from "./products.service"
 import { CreateProductDto, createProductSchema } from "./dto/create-product.dto"
 import { UpdateProductDto, updateProductSchema } from "./dto/update-product.dto"
@@ -13,8 +27,8 @@ import { FileUploadDto } from "../services/filesystem/interfaces/filesystem.inte
 import { DtoMapper } from "./interfaces/update-product-mapper.interface"
 import { ProductsInterceptor } from "./interceptors/products.interceptor"
 import { ProductInterceptor } from "./interceptors/product.interceptor"
-import { UnAuthorizedException } from "@/exceptions/unAuthorized.exception"
 import { IProductsQuery } from "./interfaces/query-filter.interface"
+import { OwnProductGuard } from "./guard/ownProduct.guard"
 @Controller("products")
 export class ProductsController {
   constructor(
@@ -69,6 +83,7 @@ export class ProductsController {
   }
 
   @Patch(":id")
+  @UseGuards(OwnProductGuard)
   @UseInterceptors(FilesInterceptor("images", 5, { ...memoryUpload, fileFilter: imageFilter }), ProductInterceptor)
   async update(
     @Param("id", ParseUUIDPipe) id: string,
@@ -76,16 +91,7 @@ export class ProductsController {
     @Req() req: Request,
     @UploadedFiles() uploadedFiles: Array<CustomFile>
   ) {
-    const user = req.user
-
     const product = await this.productsService.findOne({ id: id })
-
-    if (!product) throw new NotFoundException("Product does not exist")
-
-    // check if user owns product
-    const ownsProduct = product.user.id === user.id
-
-    if (!ownsProduct) throw new UnAuthorizedException("You are not allowed to edit this product")
 
     const images = await this.productsService.handleImageUploads(uploadedFiles, product.images, updateProductDto.images || [])
 
