@@ -94,7 +94,7 @@ export class ProductsController {
 
     if (!ownsProduct) throw new UnAuthorizedException("You are not allowed to edit this product")
 
-    const images = await this.productsService.handleImageUploads(uploadedFiles, product.images, updateProductDto.images)
+    const images = await this.productsService.handleImageUploads(uploadedFiles, product.images, updateProductDto.images || [])
 
     const updateProduct: UpdateProductDto = {
       ...updateProductDto,
