@@ -1,6 +1,6 @@
 import { IAuth } from "@/config/auth.config"
 import { UnAuthorizedException } from "@/exceptions/unAuthorized.exception"
-import { UserService } from "@/modules/user/user.service"
+import { UserService } from "@/modules/users/user.service"
 import { CanActivate, ExecutionContext, Injectable } from "@nestjs/common"
 import { ConfigService } from "@nestjs/config"
 import { JwtService } from "@nestjs/jwt"

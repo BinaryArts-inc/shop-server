@@ -1,5 +1,5 @@
 import { UnAuthorizedException } from "@/exceptions/unAuthorized.exception"
-import { User } from "@/modules/user/entity/user.entity"
+import { User } from "@/modules/users/entity/user.entity"
 import { ExecutionContext, Injectable } from "@nestjs/common"
 import { Reflector } from "@nestjs/core"
 import { AuthGuard } from "@nestjs/passport"

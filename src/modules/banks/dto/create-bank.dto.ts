@@ -1,4 +1,4 @@
-import { User } from "@/modules/user/entity/user.entity"
+import { User } from "@/modules/users/entity/user.entity"
 import * as joi from "joi"
 
 export class CreateBankDto {

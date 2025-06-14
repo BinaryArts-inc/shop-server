@@ -4,7 +4,7 @@ import { StoreController } from "./store.controller"
 import { TypeOrmModule } from "@nestjs/typeorm"
 import { Store } from "./entities/store.entity"
 import { ServicesModule } from "../services/services.module"
-import { UserModule } from "../user/user.module"
+import { UserModule } from "../users/user.module"
 import { jwtConfig } from "@/config/jwt.config"
 import { JwtModule } from "@nestjs/jwt"
 

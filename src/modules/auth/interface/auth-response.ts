@@ -1,5 +1,5 @@
-import Business from "@/modules/user/entity/business.entity"
-import { User } from "@/modules/user/entity/user.entity"
+import Business from "@/modules/users/entity/business.entity"
+import { User } from "@/modules/users/entity/user.entity"
 
 export interface IAuthResponse {
   user: {

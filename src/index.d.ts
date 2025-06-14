@@ -1,5 +1,5 @@
 import { EntityManager, FindOptionsWhere } from "typeorm"
-import { User as AppUser } from "./modules/user/entity/user.entity"
+import { User as AppUser } from "./modules/users/entity/user.entity"
 
 declare global {
   namespace Express {

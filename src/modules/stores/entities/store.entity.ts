@@ -1,5 +1,5 @@
 import { Product } from "@/modules/products/entities/product.entity"
-import Business from "@/modules/user/entity/business.entity"
+import Business from "@/modules/users/entity/business.entity"
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToOne, OneToMany, JoinColumn } from "typeorm"
 
 @Entity()

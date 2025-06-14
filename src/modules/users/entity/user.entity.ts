@@ -1,7 +1,7 @@
 import { BeforeInsert, BeforeUpdate, Column, CreateDateColumn, Entity, OneToMany, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm"
 import * as bcrypt from "bcryptjs"
 import Business from "./business.entity"
-import { Bank } from "@/modules/bank/entities/bank.entity"
+import { Bank } from "@/modules/banks/entities/bank.entity"
 import { Product } from "@/modules/products/entities/product.entity"
 
 export enum UserRoleEnum {

@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common"
-import { UserService } from "../user/user.service"
+import { UserService } from "../users/user.service"
 import { LoginAuthDto, LoginDto } from "./dto/auth.dto"
 import { ConfigService } from "@nestjs/config"
 import { IAuth } from "@/config/auth.config"

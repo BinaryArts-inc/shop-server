@@ -1,5 +1,5 @@
 import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, OneToOne, JoinColumn } from "typeorm"
-import { Store } from "@/modules/store/entities/store.entity"
+import { Store } from "@/modules/stores/entities/store.entity"
 import { User } from "./user.entity"
 
 @Entity()
