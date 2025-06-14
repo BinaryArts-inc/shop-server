@@ -26,6 +26,5 @@ export const createProductSchema = joi.object({
   discountPrice: joi.number().optional(),
   stockCount: joi.number().required(),
   storeId: joi.string().required(),
-  status: joi.string().valid("draft", "published").optional(),
-  images: joi.array().min(1).max(5).items(joi.string()).optional()
+  status: joi.string().valid("draft", "published").optional()
 })

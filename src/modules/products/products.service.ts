@@ -87,25 +87,27 @@ export class ProductsService implements IService<Product> {
       const lengthOfExistingImages = existingImages.length // 1
       const lengthOfImagesToBeUploaded = uploadedFiles.length // 4
       const lengthOfTheNewImageArray = lengthOfExistingImages + lengthOfImagesToBeUploaded
+
       if (lengthOfTheNewImageArray > 5) {
         throw new BadReqException("Images will execeed the total of images to be uploaded")
       }
-      const uploadedUrls = await Promise.all(
-        uploadedFiles.map(async (image, index) => {
-          try {
-            const extension = image.mimetype.split("/")[1] || "jpg" // Fallback extension
-            const fileDto: FileUploadDto = {
-              destination: `images/${image.originalname}-storelogo-${index}.${extension}`,
-              mimetype: image.mimetype,
-              buffer: image.buffer,
-              filePath: image.path
-            }
-            return await this.fileSystem.upload(fileDto)
-          } catch (error) {
-            throw new BadReqException(`Failed to upload image ${image.originalname}: ${error.message}`)
+
+      const promises = uploadedFiles.map(async (image) => {
+        try {
+          const fileDto: FileUploadDto = {
+            destination: `images/logo/${image.originalname}${image.extension}`,
+            mimetype: image.mimetype,
+            buffer: image.buffer,
+            filePath: image.path
           }
-        })
-      )
+          return await this.fileSystem.upload(fileDto)
+        } catch (error) {
+          throw new BadReqException(`Failed to upload image ${image.originalname}: ${error.message}`)
+        }
+      })
+
+      const uploadedUrls = await Promise.all(promises)
+
       return [...existingImages, ...uploadedUrls]
     }
 
@@ -116,6 +118,7 @@ export class ProductsService implements IService<Product> {
 
     // Check if images to be replaced exist in existing images
     const indexesToReplace = imagesToBeReplaced.map((image) => existingImages.indexOf(image))
+
     if (indexesToReplace.includes(-1)) {
       throw new BadReqException("Some images to be replaced are not in the existing images")
     }
@@ -124,22 +127,21 @@ export class ProductsService implements IService<Product> {
     const updatedImages = [...existingImages]
 
     // Upload new images
-    const uploadedUrls = await Promise.all(
-      uploadedFiles.map(async (image, index) => {
-        try {
-          const extension = image.mimetype.split("/")[1] || "jpg" // Fallback extension
-          const fileDto: FileUploadDto = {
-            destination: `images/${image.originalname}-storelogo-${index}.${extension}`,
-            mimetype: image.mimetype,
-            buffer: image.buffer,
-            filePath: image.path
-          }
-          return await this.fileSystem.upload(fileDto)
-        } catch (error) {
-          throw new BadReqException(`Failed to upload image ${image.originalname}: ${error.message}`)
+    const promises = uploadedFiles.map(async (image) => {
+      try {
+        const fileDto: FileUploadDto = {
+          destination: `images/logo/${image.originalname}${image.extension}`,
+          mimetype: image.mimetype,
+          buffer: image.buffer,
+          filePath: image.path
         }
-      })
-    )
+        return await this.fileSystem.upload(fileDto)
+      } catch (error) {
+        throw new BadReqException(`Failed to upload image ${image.originalname}: ${error.message}`)
+      }
+    })
+
+    const uploadedUrls = await Promise.all(promises)
 
     // Replace images at specified indexes
     indexesToReplace.forEach((index, i) => {
