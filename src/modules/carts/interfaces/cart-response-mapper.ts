@@ -9,7 +9,8 @@ export abstract class CartResponseMapper implements IInterceptor {
         id: data.product.id,
         price: data.product.price,
         discountPrice: data.product.discountPrice,
-        name: data.product.name
+        name: data.product.name,
+        images: data.product.images
       },
       quantity: data.quantity,
       subTotal: data.quantity * (data.product.discountPrice || data.product.price),
