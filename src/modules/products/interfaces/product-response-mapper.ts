@@ -2,7 +2,7 @@ import { Product } from "../entities/product.entity"
 import { IProductResponse } from "./product-response-interface"
 
 export abstract class ProductResponseMapper implements IInterceptor {
-  transform(data: Product): IProductResponse {
+  transform(data: Product & { isLiked?: boolean }): IProductResponse {
     return {
       id: data.id,
       name: data.name,
@@ -10,6 +10,7 @@ export abstract class ProductResponseMapper implements IInterceptor {
       category: data.category,
       description: data.description,
       discountPrice: data.discountPrice,
+      isLiked: data.isLiked,
       images: data.images,
       price: data.price,
       stockCount: data.stockCount,

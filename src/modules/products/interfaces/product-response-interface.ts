@@ -6,6 +6,7 @@ export interface IProductResponse {
   category: ProductCategoriesEnum
   description: string
   price: number
+  isLiked?: boolean
   discountPrice: number
   stockCount: number
   images: string[]
