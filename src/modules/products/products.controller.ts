@@ -87,7 +87,7 @@ export class ProductsController {
     const user = req.user
     const product = await this.productsService.findById(saveProductDto.productId)
     if (!product) throw new NotFoundException("product not found")
-    return this.productsService.save({ user, product })
+    return this.productsService.save({ user, product, isLiked: saveProductDto.isLiked })
   }
 
   @Delete("/saves/:productId")
