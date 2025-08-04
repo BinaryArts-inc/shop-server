@@ -22,11 +22,11 @@ export class Subscription {
   @Column({ default: "" })
   subscriptionCode: string
 
-  @Column({ type: "timestamp" })
-  startDate: Date
+  @Column({ type: "timestamp", nullable: true })
+  startDate?: Date
 
-  @Column({ type: "timestamp" })
-  endDate: Date
+  @Column({ type: "timestamp", nullable: true })
+  endDate?: Date
 
   @Column()
   planType: string // name of the plan

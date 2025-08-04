@@ -18,7 +18,6 @@ import { InitiatePayment } from "../services/payments/interfaces/strategy.interf
 import { PaymentsService } from "../services/payments/payments.service"
 import { ProductStatusEnum } from "../common/types"
 import { NotFoundException } from "@/exceptions/notfound.exception"
-// import { JoiValidationPipe } from "@/validations/joi.validation"
 
 @Controller("ads")
 export class AdsController {
@@ -51,14 +50,10 @@ export class AdsController {
       throw new BadReqException(`An active promotion ad of type '${promotion.type}' already exists for this product`)
     }
 
-    const { startDate, endDate } = await this.adsService.calculateStartAndEndDate(promotion.duration)
-
     const ad = await this.adsService.create({
       duration: promotion.duration,
       productId: product.id,
       type: promotion.type,
-      startDate: startDate,
-      endDate: endDate,
       promotionId: promotion.id,
       paymentMethod: dto.paymentMethod
     })
@@ -68,7 +63,7 @@ export class AdsController {
       email: user.email,
       reference: ad.id
     }
-    // // TODO: Implement a scheduler to update promotionAds status to expired when endDate
+
     return await this.paymentsService.with(dto.paymentMethod).initiatePayment(payload)
   }
 

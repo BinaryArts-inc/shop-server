@@ -6,11 +6,15 @@ import { EntityManager, FindManyOptions, FindOptionsWhere, Repository } from "ty
 import { InjectRepository } from "@nestjs/typeorm"
 import { GetSubscriptionPayload, ISubscriptionsQuery } from "./interface/query-filter.interface"
 import { PaymentsService } from "../services/payments/payments.service"
+import { Queue } from "bullmq"
+import { InjectQueue } from "@nestjs/bullmq"
+import { AppQueues } from "@/constants"
 
 @Injectable()
-export class SubscriptionService implements IService<Subscription> {
+export class SubscriptionService implements IService<Subscription>, UseQueue<string, Subscription> {
   constructor(
     @InjectRepository(Subscription) private subscriptionRepository: Repository<Subscription>,
+    @InjectQueue(AppQueues.END_SUBSCRIPTION) private queue: Queue,
     private paymentService: PaymentsService
   ) {}
 
@@ -70,6 +74,16 @@ export class SubscriptionService implements IService<Subscription> {
   async remove(filter: FindOptionsWhere<Subscription>): Promise<number> {
     const result = await this.subscriptionRepository.delete(filter)
     return result.raw
+  }
+
+  async dispatch({ name, data }: QueueDispatch<string, Subscription>) {
+    const delay = new Date(data.endDate).getTime() - Date.now()
+
+    if (delay > 0) {
+      await this.queue.add(name, data, { delay })
+    } else {
+      await this.queue.add(name, data)
+    }
   }
 
   async getStartAndEndDate(planType: string) {

@@ -1,14 +1,21 @@
 import { Injectable } from "@nestjs/common"
+import { InjectRepository } from "@nestjs/typeorm"
+import { EntityManager, FindOptionsWhere, Not, Repository } from "typeorm"
+
+import { Ad } from "./entities/ad.entity"
 import { CreateAdDto } from "./dto/create-ad.dto"
 import { UpdateAdDto } from "./dto/update-ad.dto"
-import { EntityManager, FindOptionsWhere, Repository } from "typeorm"
-import { Ad } from "./entities/ad.entity"
-import { InjectRepository } from "@nestjs/typeorm"
 import { IAdsQuery } from "./interfaces/query-interface-filter"
+import { InjectQueue } from "@nestjs/bullmq"
+import { AppQueues } from "@/constants"
+import { Queue } from "bullmq"
 
 @Injectable()
-export class AdsService {
-  constructor(@InjectRepository(Ad) private adRepository: Repository<Ad>) {}
+export class AdsService implements IService<Ad>, UseQueue<string, Ad> {
+  constructor(
+    @InjectRepository(Ad) private adRepository: Repository<Ad>,
+    @InjectQueue(AppQueues.END_ADS) private queue: Queue
+  ) {}
 
   async create(data: CreateAdDto, manager?: EntityManager): Promise<Ad> {
     const repo = manager ? manager.getRepository(Ad) : this.adRepository
@@ -17,7 +24,7 @@ export class AdsService {
   }
 
   async find({ productId, vendorId, type, storeId, limit, page }: IAdsQuery): Promise<[Ad[], number]> {
-    const where: FindOptionsWhere<Ad> = {}
+    const where: FindOptionsWhere<Ad> = { status: Not("inactive") }
 
     if (productId) {
       where.productId = productId
@@ -63,6 +70,10 @@ export class AdsService {
   async remove(filter: FindOptionsWhere<Ad>): Promise<number> {
     const result = await this.adRepository.delete(filter)
     return result.affected || 0
+  }
+
+  async dispatch({ name, data }: QueueDispatch<string, Ad>) {
+    this.queue.add(name, data, { delay: data.duration * 24 * 60 * 60 * 1000 })
   }
 
   async calculateStartAndEndDate(duration: number): Promise<{ startDate: Date; endDate: Date }> {

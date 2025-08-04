@@ -13,6 +13,7 @@ import { WithdrawalsService } from "../withdrawals/withdrawals.service"
 import { PayoutsService } from "../payouts/payouts.service"
 import { AdsService } from "../ads/ads.service"
 import { Ad } from "../ads/entities/ad.entity"
+import { vendonEnumType } from "../stores/entities/store.entity"
 
 @Injectable()
 export class WebhookService {
@@ -63,9 +64,16 @@ export class WebhookService {
 
     if (!vendor) return
 
+    const { startDate, endDate } = await this.subscriptionService.getStartAndEndDate(subscription.planType.toLowerCase())
+
     await this.subscriptionService.update(subscription, {
-      status: SubscriptionEnum.ACTIVE
+      status: SubscriptionEnum.ACTIVE,
+      startDate,
+      endDate
     })
+
+    // dispatch job to end subscription
+    await this.subscriptionService.dispatch({ name: subscription.id, data: subscription })
 
     const store = await this.storeService.findOne({ id: vendor.business.store.id })
 
@@ -73,7 +81,7 @@ export class WebhookService {
       return
     }
 
-    await this.storeService.update(store, { isStarSeller: true })
+    await this.storeService.update(store, { isStarSeller: true, type: vendonEnumType.PREMIUM })
 
     return
   }
@@ -163,7 +171,9 @@ export class WebhookService {
   }
 
   async handleChargeForAds(data: Ad) {
-    await this.adsService.update(data, { status: "active" })
+    const { startDate, endDate } = await this.adsService.calculateStartAndEndDate(data.duration)
+    await this.adsService.update(data, { status: "active", startDate, endDate })
+    await this.adsService.dispatch({ name: data.id, data })
     return
   }
 }

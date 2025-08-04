@@ -48,4 +48,14 @@ declare global {
     "success" = "success",
     "failed" = "failed"
   }
+
+  export interface QueueDispatch<T extends string, K> {
+    name: T
+    data: K
+    jobOptions?: JobsOptions
+  }
+
+  export interface UseQueue<T extends string, K> {
+    dispatch: (options: QueueDispatch<T, K>) => Promise<void>
+  }
 }

@@ -41,10 +41,7 @@ export class SubscriptionController {
 
     createSubscriptionDto.vendorId = user.id
     createSubscriptionDto.reference = createSubscription.reference
-    const { startDate, endDate } = await this.subscriptionService.getStartAndEndDate(createSubscriptionDto.planType.toLowerCase())
 
-    createSubscriptionDto.startDate = startDate
-    createSubscriptionDto.endDate = endDate
     const subscription = await this.subscriptionService.create(createSubscriptionDto)
 
     return {

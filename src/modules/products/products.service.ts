@@ -10,6 +10,7 @@ import { FileSystemService } from "../services/filesystem/filesystem.service"
 import { IProductsQuery } from "./interfaces/query-filter.interface"
 import { SavedProduct } from "./entities/saved-product.entity"
 import { PromotionTypeEnum } from "../promotions/entities/promotion.entity"
+import { ProductStatusEnum } from "../common/types"
 
 @Injectable()
 export class ProductsService implements IService<Product> {
@@ -62,6 +63,7 @@ export class ProductsService implements IService<Product> {
     }
 
     if (status) {
+      if (status !== ProductStatusEnum.draft && status !== ProductStatusEnum.published) throw new BadReqException("invalid status")
       query.andWhere("product.status = :status", { status })
     }
 
