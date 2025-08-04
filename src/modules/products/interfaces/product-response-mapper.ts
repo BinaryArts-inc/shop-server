@@ -10,7 +10,10 @@ export abstract class ProductResponseMapper implements IInterceptor {
       category: data.category,
       description: data.description,
       discountPrice: data.discountPrice,
-      isLiked: data.isLiked,
+      savedProduct: data.savedBy?.map((saved) => ({
+        id: saved.id,
+        isLiked: saved.isLiked
+      })),
       images: data.images,
       price: data.price,
       stockCount: data.stockCount,

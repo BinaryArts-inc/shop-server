@@ -47,10 +47,7 @@ export class ProductsService implements IService<Product> {
       skip: page ? page - 1 : undefined
     })
 
-    const products = saved.map((item) => ({
-      ...item.product,
-      isLiked: item.isLiked
-    }))
+    const products = saved.map((item) => item.product)
     return [products, count]
   }
 
