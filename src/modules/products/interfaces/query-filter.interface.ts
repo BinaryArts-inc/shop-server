@@ -8,4 +8,5 @@ export interface IProductsQuery extends PaginationParams, FindOptionsWhere<Produ
   search?: string
   vendor?: vendonEnumType
   flag?: "top" | "featured" | "handpicked" | "banner" | "search"
+  order?: "ACS" | "DESC"
 }
