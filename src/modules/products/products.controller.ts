@@ -40,6 +40,8 @@ import { ProductCategoriesEnum } from "../common/types"
 import { SaveProductDto, saveProductSchema } from "./dto/save-product.dto"
 import { CsvService } from "../services/utils/csv/csv.service"
 import { Response } from "express"
+import { UserRoleEnum } from "../users/entity/user.entity"
+import { UserService } from "../users/user.service"
 @Controller("products")
 export class ProductsController {
   constructor(
@@ -47,7 +49,8 @@ export class ProductsController {
     private storeService: StoreService,
     private fileSystem: FileSystemService,
     private dtoMapper: DtoMapper,
-    private readonly csvService: CsvService
+    private readonly csvService: CsvService,
+    private readonly userService: UserService
   ) {}
 
   @Post()
@@ -139,7 +142,18 @@ export class ProductsController {
   @Public()
   @UseInterceptors(ProductsInterceptor)
   async findAll(@Query() query: IProductsQuery) {
-    return await this.productsService.find(query)
+    const userId = query.userId
+    if (userId) {
+      const user = await this.userService.findById(userId.toString())
+      if (user.role === UserRoleEnum.Customer) {
+        query.userId = user.id
+      } else {
+        query.userId = null
+      }
+    }
+
+    const products = await this.productsService.find(query)
+    return products
   }
 
   @Get("/saves")

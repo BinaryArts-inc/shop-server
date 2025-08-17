@@ -52,11 +52,15 @@ export class ProductsService implements IService<Product> {
     return [products, count]
   }
 
-  async find({ page, limit, status, stockCount, storeId, categories, vendor, flag, search }: IProductsQuery) {
+  async find({ page, limit, status, stockCount, storeId, categories, vendor, flag, search, userId }: IProductsQuery) {
     const query = this.productRepository
       .createQueryBuilder("product")
       .leftJoinAndSelect("product.store", "store")
       .leftJoinAndSelect("product.user", "user")
+
+    if (userId) {
+      query.leftJoinAndSelect("product.savedBy", "savedBy")
+    }
 
     if (storeId) {
       query.andWhere("product.storeId = :storeId", { storeId })
@@ -103,7 +107,6 @@ export class ProductsService implements IService<Product> {
         search: `%${search.toLowerCase()}%`
       })
     }
-
     return await query
       .take(limit)
       .skip(page && page > 0 ? (page - 1) * limit : 0)

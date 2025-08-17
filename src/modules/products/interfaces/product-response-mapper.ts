@@ -18,12 +18,11 @@ export abstract class ProductResponseMapper implements IInterceptor {
         id: data.store.id,
         name: data.store.name
       },
-      savedProduct: data?.savedBy.map((savedProduct) => {
-        return {
+      savedProduct:
+        data?.savedBy?.map((savedProduct) => ({
           id: savedProduct.id,
           isLiked: savedProduct.isLiked
-        }
-      }),
+        })) || [],
       user: {
         id: data.user.id,
         name: data.user.getFullName()

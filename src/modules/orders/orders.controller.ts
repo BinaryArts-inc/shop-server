@@ -78,11 +78,11 @@ export class OrdersController {
   async findOne(@Param("id") id: string, @Req() req: Request) {
     const filter: FindOptionsWhere<Order> & { storeId?: string } = { id }
 
-    if (req.user.role !== UserRoleEnum.Customer) {
+    if (req.user.role !== UserRoleEnum.Customer && req.user.role !== UserRoleEnum.Admin) {
       filter.storeId = req.user.business.store.id
     }
 
-    const order = this.ordersService.findOne(filter)
+    const order = await this.ordersService.findOne(filter)
 
     if (!order) {
       throw new NotFoundException("Order not found")

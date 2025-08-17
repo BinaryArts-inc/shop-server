@@ -8,10 +8,7 @@ export interface IProductResponse {
   price: number
   rating: number
   discountPrice: number
-  savedProduct?: {
-    id: string
-    isLiked: boolean
-  }[]
+  savedProduct: SavedProduct[]
   stockCount: number
   images: string[]
   status: ProductStatusEnum
@@ -19,4 +16,9 @@ export interface IProductResponse {
   user: IdName
   createdAt: Date
   updateAt: Date
+}
+
+type SavedProduct = {
+  id: string
+  isLiked: boolean
 }
