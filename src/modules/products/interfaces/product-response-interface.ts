@@ -8,6 +8,10 @@ export interface IProductResponse {
   price: number
   rating: number
   discountPrice: number
+  savedProduct?: {
+    id: string
+    isLiked: boolean
+  }[]
   stockCount: number
   images: string[]
   status: ProductStatusEnum
