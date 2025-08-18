@@ -7,5 +7,5 @@ export class SaveProductDto {
 
 export const saveProductSchema = joi.object({
   productId: joi.string().required(),
-  isLiked: joi.boolean().optional().default(false)
+  isLiked: joi.boolean().optional().default(true)
 })
