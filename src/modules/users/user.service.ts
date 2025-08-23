@@ -16,7 +16,7 @@ export class UserService implements IService<User> {
     private userRepository: Repository<User>
   ) {}
 
-  private readonly relations = ["business", "business.store"]
+  private readonly relations = ["business", "business.store", "subscriptions"]
 
   async create(data: CreateUserDto, manager?: EntityManager): Promise<User> {
     const exist = await this.exists({ email: data.email })
@@ -36,6 +36,7 @@ export class UserService implements IService<User> {
       .leftJoinAndSelect("business.store", "store")
       .leftJoinAndSelect("user.orders", "orders")
       .leftJoinAndSelect("orders.items", "items")
+      .leftJoinAndSelect("user.subscriptions", "subscriptions")
 
     if (role) {
       query.andWhere("user.role = :role", { role })
