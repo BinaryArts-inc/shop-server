@@ -17,21 +17,24 @@ import { FileInterceptor } from "@nestjs/platform-express"
 import { imageFilter, memoryUpload } from "@/config/multer.config"
 import { FileUploadDto } from "../services/filesystem/interfaces/filesystem.interface"
 import { FileSystemService } from "../services/filesystem/filesystem.service"
-import { profile } from "console"
 
 @Controller("users")
 export class UserController {
   constructor(
     private readonly userService: UserService,
-     private fileSystemService: FileSystemService,
+    private fileSystemService: FileSystemService,
     private readonly csvService: CsvService
   ) {}
 
   @UseGuards(PolicyUsersGuard)
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Update, User))
-  @UseInterceptors(FileInterceptor("image", { ...memoryUpload, fileFilter: imageFilter }),UserInterceptor)
+  @UseInterceptors(FileInterceptor("image", { ...memoryUpload, fileFilter: imageFilter }), UserInterceptor)
   @Patch("/:id")
-  async update(@Param("id", ParseUUIDPipe) id: string, @Body(new JoiValidationPipe(updateUserSchema)) updateUser: UpdateUserDto,  @UploadedFile() fileUploaded: CustomFile,) {
+  async update(
+    @Param("id", ParseUUIDPipe) id: string,
+    @Body(new JoiValidationPipe(updateUserSchema)) updateUser: UpdateUserDto,
+    @UploadedFile() fileUploaded: CustomFile
+  ) {
     const user = await this.userService.findById(id)
     if (!user) {
       throw new NotFoundException("User does not exist")
@@ -39,20 +42,20 @@ export class UserController {
 
     let url: string
     if (fileUploaded) {
-       const fileDto: FileUploadDto = {
-            destination: `images/${fileUploaded.originalname}-userlogo.${fileUploaded.extension}`,
-            mimetype: fileUploaded.mimetype,
-            buffer: fileUploaded.buffer,
-            filePath: fileUploaded.path
-          }
-          url = await this.fileSystemService.upload(fileDto)
-  }
+      const fileDto: FileUploadDto = {
+        destination: `images/${fileUploaded.originalname}-userlogo.${fileUploaded.extension}`,
+        mimetype: fileUploaded.mimetype,
+        buffer: fileUploaded.buffer,
+        filePath: fileUploaded.path
+      }
+      url = await this.fileSystemService.upload(fileDto)
+    }
 
-   updateUser = {...updateUser, profileImage: url ?? user.profileImage}
+    updateUser = { ...updateUser, profileImage: url ?? user.profileImage }
 
-   if (fileUploaded && user.profileImage?.trim()) {
+    if (fileUploaded && user.profileImage?.trim()) {
       await this.fileSystemService.delete(user.profileImage)
-   }
+    }
 
     return await this.userService.update(user, updateUser)
   }

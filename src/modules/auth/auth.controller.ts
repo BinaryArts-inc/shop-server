@@ -214,6 +214,17 @@ export class AuthController {
   }
 
   @Public()
+  @Post("/login")
+  @HttpCode(200)
+  @UseInterceptors(AuthInterceptor)
+  @UseGuards(LoginValidationGuard, PasswordAuthGuard)
+  async loginWeb(@Req() req: Request) {
+    const tokens = await this.authService.login({ email: req.user.email, id: req.user.id })
+
+    return { user: req.user, tokens }
+  }
+
+  @Public()
   @Post("/login/vendor")
   @HttpCode(200)
   @UseInterceptors(AuthInterceptor)
@@ -305,14 +316,20 @@ export class AuthController {
   @Public()
   @Post("/forgotpassword")
   @HttpCode(HttpStatus.OK)
-  async forgotPassword(@Body(new JoiValidationPipe(forgotPasswordSchema)) { email }: ForgotPasswordDto) {
+  async forgotPassword(@Body(new JoiValidationPipe(forgotPasswordSchema)) { email }: ForgotPasswordDto, @Req() req: Request) {
+    // eslint-disable-next-line no-console
+    console.log("mobile", req.headers.platform)
+
+    const isMobile = req.headers.platform === "mobile"
     const user = await this.userService.findOne({ email })
 
     if (!user) return new NotFoundException("user not found!")
 
     const token = await this.authService.forgotPassword(user)
 
-    const link = this.configService.get<IApp>("app").clientUrl + `/reset-password?token=${token}`
+    const baseUrl = isMobile ? "https://app.skicomltd.com" : this.configService.get<IApp>("app").clientUrl
+
+    const link = baseUrl + `/reset-password?token=${token}`
 
     await this.mailService.send(new PasswordRestMail(link, email))
 
