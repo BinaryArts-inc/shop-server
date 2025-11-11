@@ -1,7 +1,8 @@
 import { Injectable } from "@nestjs/common"
-import { JwtService } from "@nestjs/jwt"
 import * as Crypto from "crypto"
 import generator from "generate-password-ts"
+import { v4 as uuidv4 } from "uuid"
+import { JwtService } from "@nestjs/jwt"
 
 @Injectable()
 export class HelpersService {
@@ -21,7 +22,7 @@ export class HelpersService {
   }
 
   async generateToken(payload: { email: string; id: string }, secret: string, expiresIn: string) {
-    const token = this.jwtService.sign(payload, { secret: secret, expiresIn: expiresIn })
+    const token = await this.jwtService.signAsync(payload, { secret, expiresIn: expiresIn })
     return token
   }
 
@@ -35,7 +36,7 @@ export class HelpersService {
     return generator.generate(options)
   }
 
-  generateOtp(length: number): number {
+  generateOtp(length: number): string {
     const numbers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 
     let otp = ""
@@ -44,6 +45,26 @@ export class HelpersService {
       otp += numbers[Crypto.randomInt(numbers.length)]
     }
 
-    return Number(otp)
+    return otp
+  }
+
+  generateReference(prefix: string): string {
+    return prefix + uuidv4()
+  }
+
+  generateCouponCode(length: number): string {
+    const prefix = "SK"
+    const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+    const numbers = "0123456789"
+    let code = prefix
+    for (let i = 0; i < length - prefix.length; i++) {
+      if (i % 2 === 0) {
+        code += characters[Crypto.randomInt(characters.length)]
+      } else {
+        code += numbers[Crypto.randomInt(numbers.length)]
+      }
+    }
+
+    return code
   }
 }

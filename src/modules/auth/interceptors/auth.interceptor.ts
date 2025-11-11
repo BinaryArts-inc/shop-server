@@ -1,7 +1,7 @@
 import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from "@nestjs/common"
-import { AuthResponseMapper } from "../interface/auth-response-mapper"
 import { AuthUserBusiness, IAuthResponse } from "../interface/auth-response"
 import { Observable, map } from "rxjs"
+import { AuthResponseMapper } from "./auth-response-mapper"
 
 @Injectable()
 export class AuthInterceptor extends AuthResponseMapper implements NestInterceptor<AuthUserBusiness, IAuthResponse> {

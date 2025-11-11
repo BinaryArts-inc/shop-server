@@ -1,0 +1,1 @@
+export const CONFIG_OPTIONS = "LOG_CONFIG_OPTIONS"

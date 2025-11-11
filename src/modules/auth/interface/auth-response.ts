@@ -1,5 +1,5 @@
-import User from "@/modules/user/entity/user.entity"
-import Business from "@/modules/user/entity/business.entity"
+import Business from "@/modules/business/entities/business.entity"
+import { User } from "@/modules/users/entity/user.entity"
 
 export interface IAuthResponse {
   user: {
@@ -8,15 +8,8 @@ export interface IAuthResponse {
     lastName: string
     email: string
     role: string
-    fullName: () => void
-    createdAt: Date
-    updatedAt: Date
-  }
-  store: {
-    id: string
-    name: string
-    description: string
-    logo: string
+    profileImage: string
+    fullName: string
     createdAt: Date
     updatedAt: Date
   }

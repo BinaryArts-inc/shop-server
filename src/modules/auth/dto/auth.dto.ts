@@ -1,5 +1,5 @@
-import { UserRoleEnum } from "@/modules/user/entity/user.entity"
 import * as joi from "joi"
+import { UserRoleEnum } from "@/modules/users/entity/user.entity"
 
 export class AuthDto {
   firstName: string
@@ -10,8 +10,8 @@ export class AuthDto {
   confirmPassword: string
 }
 
-export class verifyEmailDto {
-  code: number
+export class VerifyEmailDto {
+  code: string
 }
 
 export class ResendOtpDto {
@@ -21,6 +21,10 @@ export class ResendOtpDto {
 export class LoginDto {
   email: string
   password: string
+  fcmToken?: string
+}
+export class LogoutDto {
+  fcmToken?: string
 }
 export class LoginAuthDto {
   email: string
@@ -48,5 +52,10 @@ export const resendOtpSchema = joi.object({
 
 export const loginSchema = joi.object({
   email: joi.string().email().required(),
-  password: joi.string().required()
+  password: joi.string().required(),
+  fcmToken: joi.string().optional()
+})
+
+export const logoutSchema = joi.object({
+  fcmToken: joi.string().optional()
 })

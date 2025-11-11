@@ -1,3 +1,5 @@
+import { UnAuthorizedException } from "@/exceptions/unAuthorized.exception"
+import { User } from "@/modules/users/entity/user.entity"
 import { ExecutionContext, Injectable } from "@nestjs/common"
 import { Reflector } from "@nestjs/core"
 import { AuthGuard } from "@nestjs/passport"
@@ -12,5 +14,12 @@ export class JwtGuard extends AuthGuard("jwt") {
     const isShortTime = this.reflector.getAllAndOverride("isShortTime", [context.getHandler(), context.getClass()])
     if (isPublic || isShortTime) return true
     return super.canActivate(context)
+  }
+
+  handleRequest<T extends User>(err: any, user: T, info: any) {
+    if (err || !user) {
+      throw err || new UnAuthorizedException(info?.message || "Unauthorized")
+    }
+    return user
   }
 }

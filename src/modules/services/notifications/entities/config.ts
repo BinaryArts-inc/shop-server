@@ -1,0 +1,2 @@
+export const NOTIFICATION_CONFIG_OPTION = "NOTIFICATION_CONFIG_OPTION"
+export const NOTIFICATION_EVENT = "notification.event"

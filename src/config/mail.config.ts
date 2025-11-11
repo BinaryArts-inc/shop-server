@@ -4,7 +4,11 @@ import { MailModuleAsyncOptions, MailModuleOptions } from "../modules/services/m
 export default registerAs(
   "mail",
   (): MailModuleOptions => ({
-    default: "smtp",
+    from: {
+      address: process.env.MAIL_FROM_ADDRESS,
+      name: process.env.MAIL_FROM_NAME
+    },
+    default: process.env.DEFAULT_MAILER || "smtp",
     clients: {
       smtp: {
         transport: "smtp",
@@ -23,45 +27,18 @@ export default registerAs(
       },
       mailgun: {
         transport: "mailgun",
-        apiKey: "",
-        domain: ""
+        apiKey: process.env.MAILGUN_API_KEY,
+        domain: process.env.MAILGUN_DOMAIN
       }
     }
   })
 )
 
-export class MailConfig {
-  static getConfig(configService: ConfigService): MailModuleOptions {
-    return {
-      default: "smtp",
-      clients: {
-        smtp: {
-          transport: "smtp",
-          host: configService.get("SMTP_HOST"),
-          port: 587,
-          auth: {
-            user: configService.get("SMTP_EMAIL"),
-            pass: configService.get("SMTP_PASSWORD")
-          }
-        },
-        ses: {
-          transport: "ses",
-          region: "",
-          accessKeyId: "",
-          secretAccessKey: ""
-        },
-        mailgun: {
-          transport: "mailgun",
-          apiKey: "",
-          domain: ""
-        }
-      }
-    }
-  }
-}
-
 export const mailConfigAsync: MailModuleAsyncOptions = {
   imports: [ConfigModule],
-  useFactory: async (configService: ConfigService) => MailConfig.getConfig(configService),
+  useFactory: async (configService: ConfigService) => {
+    const config = configService.get<MailModuleOptions>("mail")
+    return config
+  },
   inject: [ConfigService]
 }

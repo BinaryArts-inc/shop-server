@@ -1,10 +1,12 @@
 import { ModuleMetadata } from "@nestjs/common"
 
+// Top-level options that the FilesystemModule will consume
 export interface FileSystemModuleOptions {
-  clients: IFileSystemClients
-  default: FileSystemDefault
+  clients: IFileSystemClients // map of configured storage clients
+  default: FileSystemDefault // the default storage driver key
 }
 
+// Shape of all supported storage clients
 export type IFileSystemClients = {
   local: LocalFsOptions
   s3: S3Options
@@ -13,10 +15,12 @@ export type IFileSystemClients = {
   cloudinary: CloudinaryStorageOptions
 }
 
+// --- Individual driver option contracts ---
+
 export type LocalFsOptions = {
   driver: "local"
-  root: string
-  baseUrl: string
+  root: string // absolute path to local storage root
+  baseUrl: string // base URL for serving local files
 }
 
 export type S3Options = {
@@ -25,7 +29,6 @@ export type S3Options = {
   bucket: string
   region: string
   secret: string
-  endpoint?: string
 }
 
 export type DOSpacesOptions = {
@@ -34,30 +37,33 @@ export type DOSpacesOptions = {
   secret: string
   bucket: string
   region: string
-  endpoint: string
 }
 
 export type GoogleStorageOptions = {
   driver: "google"
   bucket: string
-  keyFilename: string
+  keyFilename: string // path to service account key
   projectId: string
-  publicUrl?: string
+  publicUrl?: string // optional: override public base URL
 }
 
 export type CloudinaryStorageOptions = {
-   driver: 'cloudinary'
-  cloud_name: string
-  api_key: string
-  api_secret: string
+  driver: "cloudinary"
+  cloudName: string
+  apiKey: string
+  apiSecret: string
 }
 
+// Union of all possible driver names
 export type FileSystemDriver = "local" | "s3" | "google" | "spaces" | "cloudinary"
 
+// Union of all possible driver config objects
 export type FIleSystemDriverOption = LocalFsOptions | DOSpacesOptions | GoogleStorageOptions | S3Options | CloudinaryStorageOptions
 
+// Default client must be one of the defined keys
 export type FileSystemDefault = keyof IFileSystemClients
 
+// Async module registration options
 export interface FileSystemModuleAsynOptions extends Pick<ModuleMetadata, "imports"> {
   useFactory?: (...args: any[]) => Promise<FileSystemModuleOptions> | FileSystemModuleOptions
   inject?: any[]

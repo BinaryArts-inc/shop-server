@@ -1,16 +1,20 @@
 import { Module } from "@nestjs/common"
 import { AuthService } from "./auth.service"
 import { AuthController } from "./auth.controller"
-import { UserModule } from "../user/user.module"
-import { JwtModule } from "@nestjs/jwt"
-import { jwtConfig } from "@/config/jwt.config"
-import { JwtStrategy } from "./strategy/jwt.strategy"
-import { PasswordStrategy } from "./strategy/password.strategy"
-import { LocalStrategy } from "./strategy/local.strategy"
+import { UserModule } from "../users/user.module"
+import { JwtStrategy } from "./strategies/jwt.strategy"
+import { PasswordStrategy } from "./strategies/password.strategy"
+import { Otp } from "./entities/otp.entity"
+import { TypeOrmModule } from "@nestjs/typeorm"
+import { JwtService } from "@nestjs/jwt"
+import { StoreModule } from "../stores/store.module"
+import { GoogleStrategy } from "./strategies/google.strategy"
+import { BusinessModule } from "../business/business.module"
+import { BankModule } from "../banks/bank.module"
 
 @Module({
-  imports: [UserModule, JwtModule.registerAsync(jwtConfig)],
+  imports: [UserModule, StoreModule, TypeOrmModule.forFeature([Otp]), BusinessModule, BankModule],
   controllers: [AuthController],
-  providers: [AuthService, PasswordStrategy, LocalStrategy, JwtStrategy]
+  providers: [AuthService, JwtStrategy, PasswordStrategy, GoogleStrategy, JwtService]
 })
 export class AuthModule {}

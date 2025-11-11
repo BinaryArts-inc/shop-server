@@ -1,17 +1,15 @@
 import { EntityManager, FindOptionsWhere } from "typeorm"
-import User from "./modules/user/entity/user.entity"
-
-declare module "Express" {
-  interface Request {
-    user: User
-    payload: {
-      email: string
-      id: string
-    }
-  }
-}
+import { User as AppUser } from "./modules/users/entity/user.entity"
 
 declare global {
+  namespace Express {
+    interface User extends AppUser {}
+  }
+  interface JwtPayload {
+    id: string
+    email: string
+  }
+
   interface IService<T> {
     create(data: unknown, manager?: EntityManager): Promise<T>
     find(data: unknown): Promise<[T[], number]>
@@ -46,7 +44,18 @@ declare global {
     extension?: string
   }
 
-  interface IInterceptor {
-    transform(data: unknown): unknown
+  export enum PaystackEventEnum {
+    "success" = "success",
+    "failed" = "failed"
+  }
+
+  export interface QueueDispatch<T extends string, K> {
+    name: T
+    data: K
+    jobOptions?: JobsOptions
+  }
+
+  export interface UseQueue<T extends string, K> {
+    dispatch: (options: QueueDispatch<T, K>) => Promise<void>
   }
 }

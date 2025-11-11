@@ -1,10 +1,10 @@
 import * as path from "path"
 import { ConfigModule, ConfigService, registerAs } from "@nestjs/config"
-import { FileSystemModuleAsynOptions, FileSystemModuleOptions } from "src/modules/services/filesystem/interfaces/config.interface"
+import { FileSystemDriver, FileSystemModuleAsynOptions, FileSystemModuleOptions } from "@modules/services/filesystem/interfaces/config.interface"
 
 function getOptions(): FileSystemModuleOptions {
   return {
-    default: "cloudinary",
+    default: (process.env.DEFAULT_FILESYSTEM || "local") as FileSystemDriver,
     clients: {
       local: {
         driver: "local",
@@ -16,8 +16,7 @@ function getOptions(): FileSystemModuleOptions {
         key: process.env.DO_SPACE_KEY,
         secret: process.env.DO_SPACE_SECRET,
         bucket: process.env.BUCKET_NAME,
-        region: process.env.DO_SPACES_REGION,
-        endpoint: process.env.DO_S3_ENDPOINT
+        region: process.env.DO_SPACES_REGION
       },
       google: {
         driver: "google",
@@ -31,14 +30,13 @@ function getOptions(): FileSystemModuleOptions {
         bucket: process.env.BUCKET_NAME,
         region: process.env.DO_SPACES_REGION,
         secret: process.env.DO_SPACE_SECRET,
-        key: process.env.DO_SPACE_KEY,
-        endpoint: process.env.DO_SPACE_ENDPOINT
+        key: process.env.DO_SPACE_KEY
       },
       cloudinary: {
         driver: "cloudinary",
-        cloud_name: process.env.CLOUDINARY_NAME,
-        api_key: process.env.CLOUDINARY_API_KEY,
-        api_secret: process.env.CLOUDINARY_API_SECRET
+        cloudName: process.env.CLOUDINARY_NAME,
+        apiKey: process.env.CLOUDINARY_API_KEY,
+        apiSecret: process.env.CLOUDINARY_API_SECRET
       }
     }
   }

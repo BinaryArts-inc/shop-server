@@ -1,70 +1,63 @@
 import { Injectable } from "@nestjs/common"
-import { UserService } from "../user/user.service"
-import { AuthDto, LoginAuthDto, LoginDto } from "./dto/auth.dto"
+import { UserService } from "../users/user.service"
+import { LoginAuthDto, LoginDto } from "./dto/auth.dto"
 import { ConfigService } from "@nestjs/config"
 import { IAuth } from "@/config/auth.config"
-import { MailService } from "../services/mail/mail.service"
 import { HelpersService } from "../services/utils/helpers/helpers.service"
 import { NotFoundException } from "@/exceptions/notfound.exception"
 import { BadReqException } from "@/exceptions/badRequest.exception"
-import User from "../user/entity/user.entity"
+import { InjectRepository } from "@nestjs/typeorm"
+import { Otp } from "./entities/otp.entity"
+import { EntityManager, FindOptionsWhere, MoreThan, Repository } from "typeorm"
+import { DateService } from "../services/utils/date/date.service"
+import { SaveOtpDto } from "./dto/save-otp.dto"
+import { User } from "../users/entity/user.entity"
+import { JwtService } from "@nestjs/jwt"
+import { UnAuthorizedException } from "@/exceptions/unAuthorized.exception"
 
 @Injectable()
 export class AuthService {
   constructor(
     private userService: UserService,
     private helperService: HelpersService,
+    private dateService: DateService,
     private configService: ConfigService,
-    private mailService: MailService
+    private jwtService: JwtService,
+
+    @InjectRepository(Otp)
+    private otpRepository: Repository<Otp>
   ) {}
 
-  async generateOtp(number: number, email: string) {
-    return await this.userService.generateOtp(number, email)
-  }
+  async saveOtp({ code, email }: SaveOtpDto, manager?: EntityManager) {
+    const repo = manager ? manager.getRepository<Otp>(Otp) : this.otpRepository
 
-  async register(data: AuthDto) {
-    const createdUser = await this.userService.create(data)
-    const otp = await this.generateOtp(6, createdUser.email)
-    // this.mailService.send({
-    //   to: createdUser.email,
-    //   subject: "Email Validation",
-    //   text: `Validate with your otp code: ${otp.code}. Your code expires in 10mins`
-    // })
-    const payload = { email: createdUser.email, id: createdUser.id }
-    const token = await this.helperService.generateToken(payload, this.configService.get<IAuth>("auth").shortTimeJwtSecret, "1h")
-    return { token }
-  }
-
-  async resendOtp(email: string) {
-    const otp = await this.generateOtp(6, email)
-    const user = await this.userService.findOne({ email: otp.email })
-    const payload = {
-      email: user.email,
-      id: user.id
+    const otpData = {
+      code,
+      email,
+      expireAt: this.dateService.addMinutes(10)
     }
-    const token = await this.helperService.generateToken(payload, this.configService.get<IAuth>("auth").shortTimeJwtSecret, "1h")
-    this.mailService.send({
-      to: user.email,
-      subject: "otp code",
-      text: `Validate with your otp code: ${otp.code}. Your code expires in 10mins`
-    })
-    return { token }
+
+    await repo.upsert(otpData, ["email"])
+    return repo.findOne({ where: { email } })
   }
 
-  async verifyEmail(code: number) {
-    const otp = await this.userService.findUserOtp({ code })
+  async verifyCode({ email, code }: FindOptionsWhere<Otp>) {
+    const otp = await this.otpRepository.findOne({ where: { email, code, expireAt: MoreThan(new Date()) } })
     if (!otp) throw new NotFoundException("OTP not found")
 
-    const user = await this.userService.findOne({ email: otp.email })
-    const updateUser = await this.userService.update(user, { isEmailVerified: true })
-    console.log(updateUser)
-    const payload = { email: user.email, id: user.id }
-    const token = await this.helperService.generateToken(payload, this.configService.get<IAuth>("auth").shortTimeJwtSecret, "1h")
-    return { token }
+    return true
+  }
+
+  async validateEmail(email: string) {
+    const user = await this.userService.findOne({ email })
+    if (!user) throw new NotFoundException("user not found")
+
+    return user
   }
 
   async validateUser(loginDto: LoginDto) {
     const user = await this.userService.findOne({ email: loginDto.email })
+
     if (!user) throw new NotFoundException("Invalid Credentials")
 
     const match = await user.comparePassword(loginDto.password)
@@ -74,10 +67,36 @@ export class AuthService {
     return user
   }
 
-  async login(loginDto: LoginAuthDto, user: User) {
+  async login(loginDto: LoginAuthDto) {
     const payload = { email: loginDto.email, id: loginDto.id }
     const token = await this.helperService.generateToken(payload, this.configService.get<IAuth>("auth").jwtSecret, "1d")
     const refreshToken = await this.helperService.generateToken(payload, this.configService.get<IAuth>("auth").refreshSecret, "30d")
-    return { user, tokens: { accessToken: token, refreshToken } }
+    return { accessToken: token, refreshToken }
+  }
+
+  async forgotPassword(user: User) {
+    const payload = { email: user.email, id: user.id }
+
+    return await this.helperService.generateToken(payload, this.configService.get<IAuth>("auth").resetSecret, "1h")
+  }
+
+  async validateResetToken(token: string): Promise<string> {
+    try {
+      const payload = await this.jwtService.verifyAsync(token, { secret: this.configService.get<IAuth>("auth").resetSecret })
+      console.error("payload", payload)
+      return payload.id
+    } catch (error) {
+      throw new UnAuthorizedException()
+    }
+  }
+
+  async validateRefreshToken(token: string): Promise<string> {
+    try {
+      const payload = await this.jwtService.verifyAsync(token, { secret: this.configService.get<IAuth>("auth").refreshSecret })
+
+      return payload.id
+    } catch (error) {
+      throw new UnAuthorizedException()
+    }
   }
 }

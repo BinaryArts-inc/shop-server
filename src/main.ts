@@ -6,7 +6,7 @@ import * as compression from "compression"
 import { join } from "path"
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule)
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, { rawBody: true })
 
   app.enableCors({ origin: "*", credentials: true })
   app.setGlobalPrefix("api/v1", { exclude: [""] })
